@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Completion — Revision Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --accent: #6c5ce7;
+    --accent-light: #a29bfe;
+    --correct: #00b894;
+    --correct-bg: rgba(0,184,148,0.12);
+    --wrong: #e17055;
+    --wrong-bg: rgba(225,112,85,0.12);
+    --text: #e8e8ef;
+    --text-dim: #8a8a9a;
+    --border: #2a2d3a;
+    --gap-bg: #2d3148;
+    --gap-border: #4a4f6a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'DM Sans',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  body::before {
+    content:'';position:fixed;inset:0;
+    background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:0;
+  }
+  .app { position:relative;z-index:1;max-width:860px;margin:0 auto;padding:40px 24px 80px; }
+
+  .header { text-align:center;margin-bottom:48px;animation:fadeDown .6s ease; }
+  .header-badge {
+    display:inline-block;background:linear-gradient(135deg,var(--accent),#8b5cf6);
+    color:white;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+    padding:6px 16px;border-radius:20px;margin-bottom:16px;
+  }
+  .header h1 {
+    font-family:'DM Serif Display',serif;font-size:clamp(28px,5vw,42px);font-weight:400;
+    line-height:1.2;margin-bottom:12px;
+    background:linear-gradient(135deg,#fff 30%,var(--accent-light));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .header p { color:var(--text-dim);font-size:15px;max-width:500px;margin:0 auto; }
+
+  .progress-container {
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:20px 24px;margin-bottom:32px;animation:fadeDown .6s ease .1s both;
+  }
+  .progress-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:12px; }
+  .progress-label { font-size:13px;font-weight:600;color:var(--text-dim); }
+  .progress-count { font-size:13px;font-weight:700;color:var(--accent-light); }
+  .progress-bar { height:6px;background:var(--border);border-radius:3px;overflow:hidden; }
+  .progress-fill {
+    height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-light));
+    border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1);width:0%;
+  }
+
+  .question-card {
+    background:var(--card);border:1px solid var(--border);border-radius:20px;
+    padding:32px;margin-bottom:24px;animation:fadeUp .5s ease;
+  }
+  .question-meta { display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap; }
+  .question-number {
+    background:linear-gradient(135deg,var(--accent),#8b5cf6);color:white;
+    font-size:12px;font-weight:700;padding:4px 12px;border-radius:8px;
+  }
+  .question-title { font-size:13px;color:var(--text-dim);font-weight:500; }
+
+  .text-body {
+    font-size:15px;line-height:2;color:var(--text);margin-bottom:28px;letter-spacing:.01em;
+  }
+  .gap {
+    display:inline-block;min-width:110px;padding:4px 14px;margin:2px 4px;
+    background:var(--gap-bg);border:2px dashed var(--gap-border);border-radius:8px;
+    text-align:center;font-weight:600;color:var(--accent-light);font-size:14px;
+    transition:all .3s ease;
+  }
+  .gap.filled { border-style:solid;background:rgba(108,92,231,.15);border-color:var(--accent); }
+  .gap.correct-gap { border-style:solid;background:var(--correct-bg);border-color:var(--correct);color:var(--correct); }
+  .gap.wrong-gap { border-style:solid;background:var(--wrong-bg);border-color:var(--wrong);color:var(--wrong);text-decoration:line-through; }
+
+  .gaps-section { display:flex;flex-direction:column;gap:20px; }
+  .gap-group {
+    background:rgba(255,255,255,.02);border:1px solid var(--border);
+    border-radius:14px;padding:16px 20px;
+  }
+  .gap-group-label {
+    font-size:12px;font-weight:700;color:var(--accent-light);
+    text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;
+  }
+  .options { display:flex;flex-wrap:wrap;gap:8px; }
+  .option-btn {
+    padding:8px 18px;border:1.5px solid var(--border);border-radius:10px;
+    background:transparent;color:var(--text);font-family:'DM Sans',sans-serif;
+    font-size:14px;font-weight:500;cursor:pointer;transition:all .2s ease;
+  }
+  .option-btn:hover:not(.disabled) {
+    border-color:var(--accent);background:rgba(108,92,231,.08);transform:translateY(-1px);
+  }
+  .option-btn.selected { border-color:var(--accent);background:rgba(108,92,231,.2);color:white;font-weight:600; }
+  .option-btn.correct { border-color:var(--correct)!important;background:var(--correct-bg)!important;color:var(--correct)!important;font-weight:700; }
+  .option-btn.wrong { border-color:var(--wrong)!important;background:var(--wrong-bg)!important;color:var(--wrong)!important;text-decoration:line-through; }
+  .option-btn.disabled { opacity:.4;cursor:not-allowed; }
+  .option-btn.show-correct { border-color:var(--correct)!important;background:var(--correct-bg)!important;color:var(--correct)!important;font-weight:700;animation:pulse .4s ease; }
+
+  .actions { display:flex;justify-content:space-between;align-items:center;margin-top:8px;animation:fadeUp .5s ease .1s both; }
+  .btn {
+    font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+    padding:12px 28px;border-radius:12px;border:none;cursor:pointer;
+    transition:all .25s ease;display:flex;align-items:center;gap:8px;
+  }
+  .btn-primary {
+    background:linear-gradient(135deg,var(--accent),#8b5cf6);color:white;
+    box-shadow:0 4px 20px rgba(108,92,231,.3);
+  }
+  .btn-primary:hover { transform:translateY(-2px);box-shadow:0 6px 28px rgba(108,92,231,.45); }
+  .btn-primary:disabled { opacity:.4;cursor:not-allowed;transform:none;box-shadow:none; }
+  .btn-secondary { background:var(--card);color:var(--text-dim);border:1px solid var(--border); }
+  .btn-secondary:hover { border-color:var(--text-dim);color:var(--text); }
+
+  .results-card {
+    background:var(--card);border:1px solid var(--border);border-radius:20px;
+    padding:40px 32px;text-align:center;animation:fadeUp .6s ease;
+  }
+  .results-emoji { font-size:56px;margin-bottom:16px; }
+  .results-title { font-family:'DM Serif Display',serif;font-size:28px;margin-bottom:8px; }
+  .results-subtitle { color:var(--text-dim);font-size:15px;margin-bottom:32px; }
+  .results-score {
+    display:inline-flex;align-items:baseline;gap:6px;
+    background:rgba(108,92,231,.12);border:1px solid var(--accent);
+    padding:16px 36px;border-radius:16px;margin-bottom:32px;
+  }
+  .results-score .big { font-family:'DM Serif Display',serif;font-size:48px;color:var(--accent-light); }
+  .results-score .small { font-size:20px;color:var(--text-dim); }
+  .results-details { display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:320px;margin:0 auto 32px; }
+  .result-stat { padding:14px;border-radius:12px;border:1px solid var(--border); }
+  .result-stat .num { font-size:22px;font-weight:700; }
+  .result-stat .label { font-size:12px;color:var(--text-dim);margin-top:4px; }
+  .stat-correct .num { color:var(--correct); }
+  .stat-wrong .num { color:var(--wrong); }
+
+  .review-section { margin-top:32px;text-align:left; }
+  .review-title { font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:20px;text-align:center; }
+  .review-item {
+    background:rgba(255,255,255,.02);border:1px solid var(--border);
+    border-radius:14px;padding:18px 20px;margin-bottom:12px;
+  }
+  .review-item-header { font-size:13px;font-weight:700;color:var(--accent-light);margin-bottom:10px; }
+  .review-gap { display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px;flex-wrap:wrap; }
+  .badge { font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px; }
+  .badge-correct { background:var(--correct-bg);color:var(--correct);border:1px solid var(--correct); }
+  .badge-wrong { background:var(--wrong-bg);color:var(--wrong);border:1px solid var(--wrong); }
+
+  .explanation-box {
+    margin-top:16px;padding:14px 18px;background:rgba(162,155,254,.07);
+    border:1px solid rgba(162,155,254,.2);border-radius:12px;
+    font-size:13px;line-height:1.7;color:var(--text-dim);
+  }
+  .explanation-box strong { color:var(--accent-light); }
+
+  .hidden { display:none!important; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-15px)}to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.05)} }
+
+  @media(max-width:600px){
+    .question-card{padding:20px 16px}
+    .app{padding:24px 14px 60px}
+    .gap{min-width:80px;font-size:12px;padding:3px 8px}
+    .option-btn{padding:7px 12px;font-size:13px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-badge">English Practice</div>
+    <h1>Text Completion Quiz</h1>
+    <p>Lis chaque texte, choisis le bon mot pour chaque trou, puis verifie tes reponses.</p>
+  </div>
+  <div class="progress-container">
+    <div class="progress-top">
+      <span class="progress-label" id="progressLabel">Texte 1 / 11</span>
+      <span class="progress-count" id="progressPercent">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+  <div id="quizArea"></div>
+  <div id="resultsArea" class="hidden"></div>
+</div>
+<script>
+const Q=[
+{title:"Online Banking Growth",
+text:"The number of American households doing their banking online grew by 39.2 percent last year. Experts predict that number to increase by a ..1.. 22.5 percent this year, and another 17.6 percent the year after.\n\nA total of 33.2 million American households are currently banking online. Young adults aged between 24 and 35 with household incomes of $75,000 or higher are ..2.. to do their banking online. Today, nearly ..3.. that group (48 percent) views bills online, and 46 percent pays bills online.\n\nOlder adults, those over 65, at all income levels, are the least likely to bank online.\n\nA representative for the American Association of Online Bankers says banks ..4.. their customers to bank online, \"because online banking is much cheaper for banks to provide than traditional in-person teller services.\"",
+gaps:[
+{id:1,opts:["superior","larger","further","more"],ans:"further",
+expl:"\"A further 22.5 percent\" = un 22,5% supplementaire. \"Further\" exprime une addition/un complement."},
+{id:2,opts:["the most likely","the more likely","most likelier","more likelier"],ans:"the most likely",
+expl:"Superlatif: \"the most likely\". On ne dit jamais \"likelier\" avec \"the most/more\"."},
+{id:3,opts:["half","two times","twice","double"],ans:"half",
+expl:"48% ≈ la moitie (half). \"Nearly half that group\" = presque la moitie de ce groupe."},
+{id:4,opts:["have been encouraged","to encourage","are encouraging","encouragement"],ans:"are encouraging",
+expl:"\"Banks are encouraging their customers\" = les banques encouragent (present progressif actif)."}
+]},
+{title:"iTecho Auto Shop — Order #45233",
+text:"From: jacobw@itecho.com\nTo: yilin@automasters.biz\nDate: 4/15/2015\nRe: Order #45233\n\nDear Ms. Gao,\n\nThank you for your recent order of brake pads and replacement windshield wipers from iTecho Auto Shop. Unfortunately, we are unable to send you the merchandise because your company credit card has ..1.. . If you would still like to ..2.. this order, please let us know so that we may hold these ..3.. for you.\n\nYou can provide another credit card number, send us a check, or use any other ..4.. form of payment, and we will be happy to process your order immediately.\n\nRegards, Jacob Weisberg\nCustomer Service\niTecho Auto Shop",
+gaps:[
+{id:1,opts:["expiration","expired","expiring","expires"],ans:"expired",
+expl:"\"has expired\" = present perfect. La carte a expire."},
+{id:2,opts:["place","check","send","remember"],ans:"place",
+expl:"\"Place an order\" = passer une commande. C'est l'expression idiomatique correcte."},
+{id:3,opts:["parts","plans","qualities","reservations"],ans:"parts",
+expl:"On parle de brake pads et wipers = des pieces auto. \"Hold these parts\" = garder ces pieces."},
+{id:4,opts:["capable","acceptable","proficient","acquainted"],ans:"acceptable",
+expl:"\"Acceptable form of payment\" = mode de paiement acceptable/valide."}
+]},
+{title:"Sid's Stationery — Holiday Sale",
+text:"Sid's Stationery\n2 Smythe St, Toronto, Canada M1B 5T6\nTel: (416) 295-1725\nDecember 1st, 20\n\nDear Ms. Michaels: Seasons Greetings.\n\nHoliday Sale\n\nAs a ..1.. customer, we wanted you to be among the first to know about our upcoming holiday sale. All craft paper, specialty printer paper, and decorative envelopes will be reduced by 50% for the month of December.\n\nAs per tradition at Sid's Stationery, we will be having a Christmas raffle. This year the grand prize is a 2-night stay for two at the Meridian Inn ..2.. Toronto Island. The winner will receive a free double occupancy stay in the penthouse suite as well as a free dinner on the moonlit patio.\n\nMoney from ticket sales will be ..3.. to The Family Foundation, a local organization that provides food and clothing to those who need it most this Christmas. We look forward ..4.. you this Christmas season.\n\nYours truly, Sid and Sandy Chester",
+gaps:[
+{id:1,opts:["value","valid","validate","valued"],ans:"valued",
+expl:"\"Valued customer\" = client estime/apprecie. Expression tres courante en business."},
+{id:2,opts:["at","over","through","on"],ans:"on",
+expl:"On utilise \"on\" avec les iles: \"on Toronto Island\"."},
+{id:3,opts:["funded","donated","purchased","collect"],ans:"donated",
+expl:"\"Will be donated to\" = sera reverse/donne a. Voix passive correcte."},
+{id:4,opts:["seeing","to seeing","see","seeing"],ans:"to seeing",
+expl:"\"Look forward to + V-ing\" : \"look forward to seeing you\" = on a hate de vous voir."}
+]},
+{title:"Sporting Goods Store — Holiday Prices",
+text:"To: elenandfamily\nFrom: salesrep234\nRe: Holiday Prices\n\nDear Customer,\n\nOur records show that you are among the top ten percent of our valuable customers for this year. As a preferred customer, you are eligible ..1.. special holiday discounts. You will receive 10% off all your online purchases made in December. This 10% can be combined with any online promotion. These are our ..2.. prices ever.\n\nWhen you log in, please identify yourself as a preferred customer by using this special login ID: XP3744. You should not share this login ID with your friends or family, but you ..3.. purchase gifts for them.\n\nWhen you use your preferred login ID, you will not only receive our best price but you will also get double bonus points that you can ..4.. future purchases. With 600 bonus points you could purchase a set of golf clubs for just $499. For 10,000 points, you can get a golf cart for $1,525.\n\nThank you for your continued business. We look forward to serving you.\n\nThe Sporting Goods Store Staff",
+gaps:[
+{id:1,opts:["to receive","for receiving","having received","received"],ans:"to receive",
+expl:"\"Eligible to receive\" = eligible pour recevoir. \"Eligible\" + to + infinitif."},
+{id:2,opts:["lowest","low","more low","lowering"],ans:"lowest",
+expl:"Superlatif de \"low\" = \"lowest\". \"Our lowest prices ever.\""},
+{id:3,opts:["had better","may","would","will"],ans:"may",
+expl:"\"You may purchase\" = vous pouvez acheter (permission). \"Will\" serait trop affirmatif ici."},
+{id:4,opts:["cumulate to","apply to","recuperate to","use to"],ans:"apply to",
+expl:"\"Apply points to purchases\" = appliquer des points a des achats. Expression standard."}
+]},
+{title:"Discount Shoe Emporium — Flyer Misprint",
+text:"DISCOUNT SHOE EMPORIUM\nMEMORANDUM\nTO: Sales Staff\nFROM: Management B.K.\nDATE: OCTOBER 9th, 20\nSUBJECT: FLYER MISPRINT\n\nPlease be aware that there was a misprint in an advertisement for our store in this week's local free press. The ad states that on Saturday all men's formal footwear is on for 55% percent off rather ..1.. 15% off.\n\nIf customers come in and ask about this sale, please ..2.. and explain the printing error. Offer them an additional 5% off coupon ..3.. for coming into our store. The coupon can be given out even if the customer decides not to purchase any shoes.\n\nPlease call a manager to the sales floor ..4.. you encounter any customers who have the ad with them and demand to receive the 55% discount. These cases will be handled on an individual basis.\n\nThank you.\n\nB.K.",
+gaps:[
+{id:1,opts:["that","they're","than","then"],ans:"than",
+expl:"\"Rather than\" = plutot que. Comparaison. \"They're\" = they are, ca n'a pas de sens ici."},
+{id:2,opts:["analyze","categorize","compromise","apologize"],ans:"apologize",
+expl:"\"Please apologize\" = veuillez vous excuser. Face a un client mecontent, on s'excuse."},
+{id:3,opts:["to thanks them","thank them","to thank them","thanks them"],ans:"to thank them",
+expl:"Infinitif de but: \"to thank them\" = pour les remercier. La structure est: coupon + to + verbe."},
+{id:4,opts:["because","before","whether","if"],ans:"if",
+expl:"\"Call a manager if you encounter...\" = appelez un manager si vous rencontrez..."}
+]},
+{title:"Customs Declaration — Airplane",
+text:"All passengers are required to complete the customs declaration form before entering the United States.\n\nYou should find a copy of this form inside the seat pocket in front of you; ..1.. , if there is no form please ask a member of the cabin crew for one before arrival at your final destination.\n\nPassengers who are not U.S. citizens or who are not permanent residents of the United States are required ..2.. either a white I-94 form ..3.. a green I-94W form. Passengers traveling on a visa must complete the white form.\n\nIf you do not require a visa, you must still have a valid machine-readable passport and complete the green I-94 form. All forms must be ..4.. in block capital using a black or blue pen.",
+gaps:[
+{id:1,opts:["however","moreover","therefore","furthermore"],ans:"however",
+expl:"\"However\" = cependant. Introduit une opposition: vous devriez trouver le formulaire, cependant si non..."},
+{id:2,opts:["to fill up","filling in","to fill out","fill"],ans:"to fill out",
+expl:"\"Required to fill out\" = obliges de remplir. \"Fill out a form\" est l'expression correcte pour les formulaires. \"Fill up\" est pour les reservoirs."},
+{id:3,opts:["or","and","nor","but"],ans:"or",
+expl:"\"Either... or...\" = soit... soit... Structure correlative standard."},
+{id:4,opts:["completed","completing","complete","completion"],ans:"completed",
+expl:"\"Must be completed\" = doivent etre remplis. Voix passive (be + participe passe)."}
+]},
+{title:"TigerNet — Our Future",
+text:"To: All TigerNet employees\nFrom: John Sullivan, CEO\nDate: April 4, 2010\nSubject: Our Future\n\nThe recent collapse of our biggest competitor has many of you wondering whether the same thing could happen here. I would like to set the record straight. Today, TigerNet is positioned for ..1.. . We are the market leader with the highest quality, most functionally complete products and proven technology, ..2.. , the most experienced and dedicated workforce, and the most tried, tested, and proven management team in the industry.\n\nWhile the severe current conditions have weakened many of our competitors, indeed, dozens of internet service providers both small and large have ..3.. from the marketplace, we are increasing our market share.\n\nAs the market continues to consolidate TigerNet will actually grow. We see enormous business opportunities ahead, and expect ..4.. to thrive for at least the next several years. Our future is bright.",
+gaps:[
+{id:1,opts:["success","succeed","successful","successfully"],ans:"success",
+expl:"\"Positioned for success\" = positionne pour le succes. Apres \"for\" on utilise un nom."},
+{id:2,opts:["the strongest balance sheet and financial viability","a strong balance sheet","strong finances","financial success"],ans:"the strongest balance sheet and financial viability",
+expl:"Cette option maintient le parallelisme avec les autres superlatifs dans la phrase (highest, most...)."},
+{id:3,opts:["withdrawn","withdrew","withdrawing","withdraw"],ans:"withdrawn",
+expl:"\"Have withdrawn\" = present perfect. Le participe passe de \"withdraw\" est \"withdrawn\"."},
+{id:4,opts:["the company","our company","this company","a company"],ans:"the company",
+expl:"\"Expect the company to thrive\" = s'attendre a ce que la societe prospere. \"The company\" est le plus naturel dans ce contexte formel."}
+]},
+{title:"Dogorail — Transport Exhibition",
+text:"Dogorail would like to invite its business associates to the 25th Dogorail Transport and Logistics Exhibition scheduled for November 9 to 11 in Prague.\n\nDogorail will be displaying its products and services on the main floor of the Zidenic Convention Center ..1.. the three-day event, and there will be a special presentation by Dogorail CEO Miroslav Sergeyev on the final night.\n\n..2..\n\nRepresentatives from Dogorail will be in attendance to assist visitors with their queries.\n\nPrivate ..3.. on any of our offerings are welcome if you wish to obtain advice about your particular requirements.\n\nTo confirm your attendance to this event, please return the enclosed form, ..4.. filled out and with your signature appended, on or before April 30.",
+gaps:[
+{id:1,opts:["throughout","during","while","within"],ans:"throughout",
+expl:"\"Throughout the event\" = tout au long de l'evenement. Insiste sur la duree complete."},
+{id:2,opts:["Dogorail products will be unveiled to event invitees once he has finished.","New products will launch after the event.","Products are on display now.","The presentation will cover new services."],ans:"Dogorail products will be unveiled to event invitees once he has finished.",
+expl:"Cette phrase fait reference a la presentation du CEO et annonce le devoilement des produits apres son discours."},
+{id:3,opts:["consultations","conversations","conferences","conclusions"],ans:"consultations",
+expl:"\"Private consultations\" = consultations privees. Terme professionnel pour un conseil personnalise."},
+{id:4,opts:["fully","full","fulfill","fulfilment"],ans:"fully",
+expl:"\"Fully filled out\" = entierement rempli. \"Fully\" est un adverbe qui modifie \"filled out\"."}
+]},
+{title:"Employee Handbook — Susan Ward",
+text:"To: All staff\nFrom: Susan Ward\nSubject: Employee handbook\nDate: April 15\n\nThank you to everyone who participated in the discussions with company management. Your comments about some employees being unaware of the procedures for day-to-day operations have been heard. We are now working to ..1.. the situation.\n\nFor starters, we will be publishing the company's standard operating procedures as soon as possible. A printed guide will give management and staff an official reference on the performance of daily tasks.\n\n..2..\n\nHopefully, it will help move us closer to our goal of having firmly ..3.. policies.\n\nIf any revisions are required, these will be incorporated into a later version of the manual. The final version will also be ..4.. through the company's internal network. If you have any questions, please direct them to your departmental supervisors.",
+gaps:[
+{id:1,opts:["address","solve","manage","handle"],ans:"address",
+expl:"\"Address the situation\" = traiter/aborder la situation. Tres courant en contexte professionnel."},
+{id:2,opts:["A provisional copy of this handbook will be distributed at the next meeting.","The handbook is ready for download.","We will email the handbook.","Contact HR for a copy."],ans:"A provisional copy of this handbook will be distributed at the next meeting.",
+expl:"Cette phrase s'inscrit logiquement entre l'annonce de la publication et l'espoir que ca aide."},
+{id:3,opts:["establishment","established","establishing","establish"],ans:"established",
+expl:"\"Firmly established policies\" = des politiques fermement etablies. On a besoin du participe passe comme adjectif."},
+{id:4,opts:["accessible","accessed","accessing","access"],ans:"accessible",
+expl:"\"Be accessible\" = etre accessible. Adjectif apres \"will be\"."}
+]},
+{title:"Peacelink — Connection Problems",
+text:"Most connection problems ..1.. by trying one of the following:\n\n1. Power cycle: Shut off both the modem and the computer and wait for 30 seconds. Turn the modem back on first, and then turn on the computer. After the PPPoE light stops ..2.. and stays on, you can reconnect to the internet.\n\nNOTE: If your modem does not have an on/off switch, ..3.. the modem from the electrical wall outlet to turn it off.\n\n2. Check for line interference: Make sure your modem is not on or ..4.. other electrical devices that may interfere with the signal. This includes your computer monitor, stereo speakers, cordless phone (or its base), or a halogen light.\n\n3. Call the Peacelink Telephone Support Center: You can talk to a technical support representative.",
+gaps:[
+{id:1,opts:["can be solved","are solving","will solve","have solved"],ans:"can be solved",
+expl:"\"Can be solved\" = peuvent etre resolus. Voix passive avec modal."},
+{id:2,opts:["blinking","blinked","blinks","to blink"],ans:"blinking",
+expl:"\"Stops blinking\" = arrete de clignoter. Apres \"stop\" + V-ing pour une action qui cesse."},
+{id:3,opts:["unplug","disconnect","remove","detach"],ans:"unplug",
+expl:"\"Unplug the modem\" = debrancher le modem. Terme technique standard."},
+{id:4,opts:["near","next","close","beside"],ans:"near",
+expl:"\"On or near other devices\" = sur ou pres d'autres appareils. \"Near\" fonctionne directement comme preposition."}
+]},
+{title:"Professor Clarke — Christian Miller",
+text:"Dear Professor Clarke,\n\nI am a recent ..1.. of the University of Tayforth, where I obtained a first-class honors degree in biotechnology. As a ..2.. motivated individual, I felt that I should contact you directly rather than simply wait for a vacancy to be posted.\n\nIt is specifically for that reason that I ..3.. to you to inquire whether there are any available positions on your research team.\n\nAfter following your work and achievements closely over the past few years, I feel that I could greatly benefit from your expertise in a working laboratory environment. I hope that one day in the future I can work ..4.. you and learn many things from you.\n\nKind regards,\n\nChristian Miller",
+gaps:[
+{id:1,opts:["graduate","graduation","graduated","graduating"],ans:"graduate",
+expl:"\"A recent graduate\" = un(e) recent(e) diplome(e). Nom apres l'article \"a\"."},
+{id:2,opts:["highly","high","higher","highest"],ans:"highly",
+expl:"\"Highly motivated\" = tres motive. \"Highly\" est l'adverbe qui modifie \"motivated\"."},
+{id:3,opts:["am writing","write","wrote","have written"],ans:"am writing",
+expl:"\"I am writing to you\" = je vous ecris (en ce moment). Present continu pour une action en cours."},
+{id:4,opts:["alongside","beside","among","between"],ans:"alongside",
+expl:"\"Work alongside you\" = travailler a vos cotes. \"Alongside\" implique collaboration."}
+]}
+];
+
+let cur=0, answers=[], checked=false;
+
+function init(){
+  answers=Q.map(q=>q.gaps.map(()=>null));
+  render();
+}
+
+function render(){
+  checked=false;
+  const q=Q[cur], a=answers[cur];
+  document.getElementById('progressLabel').textContent=`Texte ${cur+1} / ${Q.length}`;
+  const pct=Math.round((cur/Q.length)*100);
+  document.getElementById('progressPercent').textContent=pct+'%';
+  document.getElementById('progressFill').style.width=pct+'%';
+
+  let html=q.text.replace(/\n/g,'<br>');
+  q.gaps.forEach((g,i)=>{
+    const v=a[i]||`___${g.id}___`;
+    const c=a[i]?'gap filled':'gap';
+    html=html.replace(`..${g.id}..`,`<span class="${c}" id="gd${g.id}">${v}</span>`);
+  });
+
+  let gh='';
+  q.gaps.forEach((g,i)=>{
+    gh+=`<div class="gap-group"><div class="gap-group-label">Trou ${g.id}</div><div class="options">`;
+    g.opts.forEach(o=>{
+      const s=a[i]===o?'selected':'';
+      const esc=o.replace(/'/g,"\\'");
+      gh+=`<button class="option-btn ${s}" onclick="sel(${i},'${esc}')">${o}</button>`;
+    });
+    gh+=`</div></div>`;
+  });
+
+  const allF=a.every(x=>x!==null);
+  document.getElementById('quizArea').innerHTML=`
+    <div class="question-card">
+      <div class="question-meta">
+        <span class="question-number">Texte ${cur+1}</span>
+        <span class="question-title">${q.title}</span>
+      </div>
+      <div class="text-body">${html}</div>
+      <div class="gaps-section">${gh}</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="prev()" ${cur===0?'style="visibility:hidden"':''}>&#8592; Precedent</button>
+      <button class="btn btn-primary" id="ckBtn" onclick="check()" ${!allF?'disabled':''}>Verifier &#10003;</button>
+    </div>`;
+}
+
+function sel(gi,v){ if(checked)return; answers[cur][gi]=v; render(); }
+
+function check(){
+  checked=true;
+  const q=Q[cur], a=answers[cur];
+
+  q.gaps.forEach((g,i)=>{
+    const el=document.getElementById('gd'+g.id);
+    if(a[i]===g.ans){
+      el.className='gap correct-gap';
+    } else {
+      el.className='gap wrong-gap';
+      const sp=document.createElement('span');
+      sp.className='gap correct-gap';
+      sp.textContent=g.ans;
+      sp.style.marginLeft='6px';
+      el.parentNode.insertBefore(sp,el.nextSibling);
+    }
+  });
+
+  const groups=document.querySelectorAll('.gap-group');
+  groups.forEach((gr,i)=>{
+    // Add explanation
+    const expDiv=document.createElement('div');
+    expDiv.className='explanation-box';
+    expDiv.innerHTML=`<strong>Explication:</strong> ${q.gaps[i].expl}`;
+    gr.appendChild(expDiv);
+
+    gr.querySelectorAll('.option-btn').forEach(b=>{
+      b.classList.add('disabled');
+      const t=b.textContent;
+      if(t===q.gaps[i].ans) b.classList.add(a[i]===q.gaps[i].ans?'correct':'show-correct');
+      else if(t===a[i]&&a[i]!==q.gaps[i].ans) b.classList.add('wrong');
+    });
+  });
+
+  const isLast=cur===Q.length-1;
+  document.getElementById('ckBtn').outerHTML=`
+    <button class="btn btn-primary" onclick="${isLast?'results()':'next()'}">
+      ${isLast?'Voir les resultats &#127942;':'Suivant &#8594;'}
+    </button>`;
+}
+
+function next(){ if(cur<Q.length-1){cur++;render();window.scrollTo({top:0,behavior:'smooth'});} }
+function prev(){ if(cur>0){cur--;render();window.scrollTo({top:0,behavior:'smooth'});} }
+
+function results(){
+  let tc=0,tg=0,rh='';
+  Q.forEach((q,qi)=>{
+    let ig='';
+    q.gaps.forEach((g,gi)=>{
+      tg++;
+      const ua=answers[qi][gi], ok=ua===g.ans;
+      if(ok)tc++;
+      ig+=`<div class="review-gap">
+        <span class="badge ${ok?'badge-correct':'badge-wrong'}">${ok?'&#10003;':'&#10007;'} Trou ${g.id}</span>
+        <span>${ok
+          ?`<strong style="color:var(--correct)">${ua}</strong>`
+          :`<span style="color:var(--wrong);text-decoration:line-through">${ua}</span> &rarr; <strong style="color:var(--correct)">${g.ans}</strong>`
+        }</span>
+      </div>`;
+    });
+    rh+=`<div class="review-item"><div class="review-item-header">Texte ${qi+1} — ${q.title}</div>${ig}</div>`;
+  });
+
+  const pct=Math.round((tc/tg)*100);
+  let em='&#127942;',msg='Excellent travail !';
+  if(pct<50){em='&#128218;';msg='Continue a pratiquer !';}
+  else if(pct<75){em='&#128170;';msg='Pas mal ! Quelques points a revoir.';}
+  else if(pct<90){em='&#127775;';msg='Tres bien ! Presque parfait.';}
+
+  document.getElementById('progressFill').style.width='100%';
+  document.getElementById('progressPercent').textContent='100%';
+  document.getElementById('progressLabel').textContent='Termine !';
+  document.getElementById('quizArea').classList.add('hidden');
+  const ra=document.getElementById('resultsArea');
+  ra.classList.remove('hidden');
+  ra.innerHTML=`<div class="results-card">
+    <div class="results-emoji">${em}</div>
+    <div class="results-title">${msg}</div>
+    <div class="results-subtitle">Voici ton score final</div>
+    <div class="results-score"><span class="big">${tc}</span><span class="small">/ ${tg}</span></div>
+    <div class="results-details">
+      <div class="result-stat stat-correct"><div class="num">${tc}</div><div class="label">Correctes</div></div>
+      <div class="result-stat stat-wrong"><div class="num">${tg-tc}</div><div class="label">Incorrectes</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="restart()" style="margin:0 auto">&#128260; Recommencer</button>
+    <div class="review-section"><div class="review-title">Detail des reponses</div>${rh}</div>
+  </div>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function restart(){
+  cur=0;answers=Q.map(q=>q.gaps.map(()=>null));checked=false;
+  document.getElementById('quizArea').classList.remove('hidden');
+  document.getElementById('resultsArea').classList.add('hidden');
+  render();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+init();
+</script>
+</body>
+</html>

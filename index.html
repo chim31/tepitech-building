@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPITECH English Quiz</title>
+<meta name="description" content="Révision d'anglais : Reading Comprehension et Text Completion, avec modes Classique, Aléatoire, Mélange, Rush, Survie et Mes erreurs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d12;--card:#151821;--card2:#1b1f2b;--border:#262a38;--hover:#1e2232;
+  --text:#e8e8ef;--dim:#8d8fa0;
+  --correct:#2ecc71;--correct-bg:rgba(46,204,113,.12);
+  --wrong:#e74c3c;--wrong-bg:rgba(231,76,60,.12);
+  --accent:#e67e22;--accent2:#f5a623;--accent-bg:rgba(230,126,34,.12);
+}
+body[data-sec="t"]{--accent:#6c5ce7;--accent2:#a29bfe;--accent-bg:rgba(108,92,231,.14)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 40%,var(--accent-bg),transparent 55%),radial-gradient(ellipse at 85% 10%,rgba(255,255,255,.025),transparent 50%);pointer-events:none;z-index:0;transition:background .4s}
+button{font-family:inherit;color:inherit}
+.app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:32px 16px 80px}
+.hidden{display:none!important}
+
+/* header */
+.header{text-align:center;margin-bottom:28px}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:12px}
+.header h1{font-family:'Playfair Display',serif;font-size:clamp(28px,6vw,42px);font-weight:700;line-height:1.15;margin-bottom:8px;background:linear-gradient(135deg,#fff 40%,var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.header p{color:var(--dim);font-size:15px;max-width:540px;margin:0 auto}
+
+/* home */
+.h2{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin:26px 0 10px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tab{text-align:left;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;display:flex;gap:12px;align-items:center}
+.tab:hover{border-color:var(--accent)}
+.tab .ic{font-size:26px}
+.tab b{display:block;font-size:16px}
+.tab small{color:var(--dim);font-size:13px}
+.tab.on{border-color:var(--accent);background:linear-gradient(135deg,var(--accent-bg),var(--card));box-shadow:0 0 0 1px var(--accent) inset}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mode{position:relative;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;transition:all .2s;min-height:112px}
+.mode:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px)}
+.mode.on{border-color:var(--accent);background:linear-gradient(160deg,var(--accent-bg),var(--card));box-shadow:0 0 0 1px var(--accent) inset}
+.mode:disabled{opacity:.4;cursor:not-allowed}
+.mode .ic{font-size:22px;display:block;margin-bottom:6px}
+.mode b{display:block;font-size:15px;margin-bottom:2px}
+.mode small{color:var(--dim);font-size:12.5px;line-height:1.35;display:block}
+.mode .pill{position:absolute;top:10px;right:10px;font-size:11px;font-weight:700;background:var(--wrong-bg);color:var(--wrong);border:1px solid var(--wrong);padding:1px 7px;border-radius:10px}
+.settings{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:6px 16px}
+.set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap}
+.set+.set{border-top:1px solid var(--border)}
+.set label{font-size:14px;font-weight:600}
+.set label small{display:block;font-weight:400;color:var(--dim);font-size:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.toggle{width:46px;height:26px;border-radius:13px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle.on{background:var(--accent)}
+.toggle.on::after{transform:translateX(20px)}
+.start{display:flex;width:100%;justify-content:center;margin-top:22px;padding:16px;font-size:17px}
+.bests{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;justify-content:center}
+.best{font-size:12.5px;color:var(--dim);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 10px}
+.best b{color:var(--accent2)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:12px 22px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px var(--accent-bg)}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed}
+.btn-sec{background:var(--card2);border:1px solid var(--border);color:var(--text)}
+.btn-sec:hover{border-color:var(--accent)}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:9px}
+
+/* topbar */
+.topbar{position:sticky;top:8px;z-index:5;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(21,24,33,.92);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:16px}
+.tb-mode{font-size:12px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:1px}
+.tb-stat{font-size:14px;font-weight:700;display:flex;align-items:center;gap:4px}
+.tb-stat small{color:var(--dim);font-weight:600;font-size:12px}
+.tb-sp{flex:1}
+.pbar{flex-basis:100%;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s ease}
+.timer{font-variant-numeric:tabular-nums;font-size:18px}
+.timer.low{color:var(--wrong);animation:pulse 1s infinite}
+.lives{letter-spacing:2px;font-size:15px}
+
+.dots{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:14px}
+.dot{min-width:32px;height:32px;padding:0 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.dot:hover{border-color:var(--accent);color:var(--text)}
+.dot.cur{background:var(--accent);border-color:var(--accent);color:#fff}
+.dot.ok{background:var(--correct);border-color:var(--correct);color:#fff}
+.dot.bad{background:var(--wrong);border-color:var(--wrong);color:#fff}
+.dot.cur.ok,.dot.cur.bad{box-shadow:0 0 0 2px var(--text)}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px;margin-bottom:18px;animation:fadeUp .35s ease}
+.card-meta{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.num{background:var(--accent-bg);color:var(--accent2);font-size:12px;font-weight:700;padding:3px 10px;border-radius:7px;white-space:nowrap}
+.card-title{font-family:'Playfair Display',serif;font-size:20px;line-height:1.3}
+.body{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:18px;font-size:15.5px;line-height:1.85;margin-bottom:22px}
+.gap{display:inline-block;min-width:70px;text-align:center;padding:0 8px;border-radius:6px;background:#262a3d;border:1px dashed #4a4f6a;color:var(--dim);font-weight:600;line-height:1.6}
+.gap.filled{border-style:solid;border-color:var(--accent);color:var(--accent2);background:var(--accent-bg)}
+.gap.ok{border:1px solid var(--correct);background:var(--correct-bg);color:var(--correct)}
+.gap.bad{border:1px solid var(--wrong);background:var(--wrong-bg);color:var(--wrong);text-decoration:line-through}
+.gap.hl{border-style:solid;border-color:var(--accent);color:var(--accent2);background:var(--accent-bg);min-width:90px}
+.qb+.qb{margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}
+.qlabel{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin-bottom:6px}
+.qtext{font-size:16px;font-weight:600;margin-bottom:12px}
+.opts{display:grid;gap:8px}
+.opts.grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.opt{display:flex;align-items:center;gap:10px;text-align:left;width:100%;background:transparent;border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14.5px;cursor:pointer;transition:all .15s}
+.opt:hover:not(:disabled){border-color:var(--accent);background:var(--hover)}
+.opt:disabled{cursor:default}
+.opt .lt{flex-shrink:0;width:26px;height:26px;border-radius:7px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--dim)}
+.opt.sel{border-color:var(--accent);background:var(--accent-bg)}
+.opt.sel .lt{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt.correct{border-color:var(--correct);background:var(--correct-bg)}
+.opt.correct .lt{background:var(--correct);border-color:var(--correct);color:#fff}
+.opt.wrong{border-color:var(--wrong);background:var(--wrong-bg)}
+.opt.wrong .lt{background:var(--wrong);border-color:var(--wrong);color:#fff}
+.opt.show{border-color:var(--correct);border-style:dashed}
+.opt.dim{opacity:.45}
+.expl{margin-top:10px;font-size:13.5px;color:#c9c9d6;background:rgba(255,255,255,.03);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:9px 12px}
+.expl b{color:var(--accent2)}
+.fb{margin-top:16px;padding:12px 14px;border-radius:10px;font-weight:700;font-size:15px;animation:fadeUp .25s ease}
+.fb.ok{background:var(--correct-bg);color:var(--correct);border:1px solid var(--correct)}
+.fb.bad{background:var(--wrong-bg);color:var(--wrong);border:1px solid var(--wrong)}
+.actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.hint{text-align:center;font-size:12px;color:var(--dim);margin-top:10px}
+.float{position:fixed;left:50%;top:90px;transform:translateX(-50%);font-weight:800;font-size:22px;pointer-events:none;animation:floatUp .9s ease forwards;z-index:20}
+.shake{animation:shake .35s}
+
+/* results */
+.results{text-align:center}
+.res-emoji{font-size:54px;margin-bottom:8px}
+.res-title{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:4px}
+.res-sub{color:var(--dim);font-size:14px;margin-bottom:22px}
+.res-score{display:inline-flex;align-items:baseline;gap:6px;background:var(--accent-bg);border:1px solid var(--accent);padding:12px 32px;border-radius:14px;margin-bottom:12px}
+.res-score .big{font-family:'Playfair Display',serif;font-size:46px;color:var(--accent2)}
+.res-score .sm{font-size:18px;color:var(--dim)}
+.record{display:block;width:max-content;margin:0 auto 18px;font-size:13px;font-weight:700;color:#1a1a1a;background:linear-gradient(135deg,#f9d423,#f5a623);padding:4px 12px;border-radius:20px;animation:pulse 1.2s infinite}
+.res-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:520px;margin:6px auto 24px}
+.res-stat{padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card2)}
+.res-stat .n{font-size:20px;font-weight:700}
+.res-stat .l{font-size:11px;color:var(--dim)}
+.sc .n{color:var(--correct)}.sw .n{color:var(--wrong)}
+.res-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.rev{margin-top:28px;text-align:left}
+.rev-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:12px;text-align:center}
+.rev-filter{display:flex;justify-content:center;margin-bottom:14px}
+.rev-item{background:rgba(255,255,255,.015);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.rev-hdr{font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:6px}
+.rev-q{font-size:13.5px;padding:3px 0}
+.rev-q .p{color:var(--dim);display:block;margin:2px 0}
+.rb{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:6px;white-space:nowrap}
+.rb-ok{background:var(--correct-bg);color:var(--correct);border:1px solid var(--correct)}
+.rb-no{background:var(--wrong-bg);color:var(--wrong);border:1px solid var(--wrong)}
+.okt{color:var(--correct);font-weight:700}
+.badt{color:var(--wrong);text-decoration:line-through}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-40px)}}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media(max-width:640px){
+  .modes{grid-template-columns:1fr 1fr}
+  .tabs{grid-template-columns:1fr}
+  .card{padding:18px 14px}
+  .body{padding:14px;font-size:15px}
+  .res-grid{grid-template-columns:1fr 1fr}
+  .topbar{gap:8px 12px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body data-sec="r">
+<div class="app">
+  <div class="header">
+    <div class="badge">EPITECH English</div>
+    <h1>English Revision Quiz</h1>
+    <p>Reading Comprehension et Text Completion, avec un mode de jeu pour chaque façon de réviser.</p>
+  </div>
+  <main id="home"></main>
+  <main id="play" class="hidden"></main>
+  <main id="results" class="hidden"></main>
+</div>
+<script>
+const RAW_R=[{"id":1,"title":"Blixen Memorial Theater — Fundraising Event","questions":[{"q":"Why did Ms. Kessler write this letter?","opts":["To advertise a new show","To invite the reader to an event","To explain a new ticketing policy","To announce a fund-raising event"],"ans":3},{"q":"What prize is being offered?","opts":["Front-row seats to four performances","Meetings with performers after the shows","A year's worth of theater tickets","A check of $3,000"],"ans":2},{"q":"The word \"present\" in paragraph 2 is closest in meaning to:","opts":["On hold","In attendance","Current","Performing"],"ans":1}]},{"id":2,"title":"Classy Shopping Bags — Ipanerra Supermarkets","questions":[{"q":"What method of reducing the use of plastic bags is NOT mentioned?","opts":["Publicizing the harmful effects of using plastic bags","Providing customers with other kinds of bags","Offering a discount for not using plastic bags","Introducing extra charges for plastic bags"],"ans":0},{"q":"What did Ipanerra stop printing on its bags?","opts":["Drawings of buildings","Cartoon figures","Pictures of animals","Company logos"],"ans":3},{"q":"The word \"harmful\" line 2, is closest in meaning to:","opts":["Endangered","Prompted","Damaging","Reusable"],"ans":2}]},{"id":3,"title":"Theater Digest — Subscription Renewal","questions":[{"q":"What is the purpose of this letter?","opts":["To advertise a new publication","To correct a billing error","To request a donation","To encourage subscription renewal"],"ans":3},{"q":"What is mentioned about the website?","opts":["It contains information about competitions for readers","It can be used for online payments","It provides access to other theater-related websites","It offers additional information on stories printed in Theater Digest"],"ans":0},{"q":"The word \"invoice\" here, in the second paragraph, is closest in meaning to:","opts":["Shipment","Bill","Turnover","Estimate"],"ans":1}]},{"id":4,"title":"Saving Time When Computing","questions":[{"q":"How often are these computer articles published?","opts":["Every week","Once a month","Twice a year","Every day"],"ans":1},{"q":"What is the topic of the next article?","opts":["Security","Making your battery last longer","Buying a new computer","Computer accessories"],"ans":1},{"q":"The word \"installment\" here, line 1 of the text, is closest in meaning to:","opts":["Device","Episode","Number","Moving"],"ans":1}]},{"id":5,"title":"Toppo Travel — Anniversary Celebration","questions":[{"q":"To what event has Mr. Adams been invited?","opts":["A retirement dinner","An awards ceremony","An anniversary celebration","A hotel's grand opening"],"ans":2},{"q":"What will the event feature?","opts":["Exotic food","A slide show","A noted speaker","Ballroom dancing"],"ans":0},{"q":"The word \"fare\" here, in the second paragraph, is closest in meaning to:","opts":["Ceremony","Food","Event","Price"],"ans":3}]},{"id":6,"title":"Selvac Appliances — Complaint Letter","questions":[{"q":"What is the purpose of the letter?","opts":["To inquire about a discount","To place an order","To make a complaint","To request repair service"],"ans":2},{"q":"What is enclosed with the letter?","opts":["A copy of the warranty","A proof of purchase","A product order form","A return envelope"],"ans":1},{"q":"The word \"appliance\" (title of the letter's recipient) is closest in meaning to:","opts":["Cleaner","Application","Service","Device"],"ans":3}]},{"id":7,"title":"Mid-City Savings Bank — Service Charge","questions":[{"q":"What must customers do to avoid a service charge?","opts":["Maintain the account for at least five years","Keep a minimum sum of money on their account","Make withdrawals of less than $1000","Have more than one account at the bank"],"ans":1},{"q":"What action did Mark Aubrey take?","opts":["He closed an account","He asked a supervisor for assistance","He requested a meeting","He canceled a charge"],"ans":3},{"q":"The word \"waive\" first line of the second paragraph, is here closest in meaning to:","opts":["Increase","Stop","Rise","Cancel"],"ans":3}]},{"id":8,"title":"Alder Park — New City Recycling Program","questions":[{"q":"What is announced in the schedule?","opts":["A revised schedule for garbage collection","Fees for residential garbage pickup","The opening of recycling center","Rules for recycling household items"],"ans":3},{"q":"How many times per month will papers be collected?","opts":["1","2","4","3"],"ans":1},{"q":"Which word is NOT a synonym for \"garbage\" (end of first paragraph)?","opts":["Refuse","Rubbish","Bin liner","Waste"],"ans":0}]},{"id":9,"title":"Anita & Nancy — Budget Negotiation","questions":[{"q":"What are Anita and Nancy trying to do?","opts":["Gain extra funding for a project","Make dinner plans","Meet influential people","Stop Bob Jones from attending a meeting"],"ans":2},{"q":"How much does Nancy want the budget raised?","opts":["Half as much as Anita","An unspecified amount","By a third","By $50,000"],"ans":2},{"q":"The word \"waste\" here, line 4 of the second e-mail, is closest in meaning to:","opts":["Lack","Garbage","Squandering","Understanding"],"ans":0}]},{"id":10,"title":"Ramonville Times — Drama Committee","questions":[{"q":"What is the purpose of this article?","opts":["To advertise auditions","To publicize a theatre event","To recruit committee members","To announce an awards contest"],"ans":2},{"q":"How can people obtain more information about RDC?","opts":["By attending an August meeting","By visiting the mayor's office","By e-mailing the Ramonvilles Times","By calling the person in charge of the committee"],"ans":3},{"q":"The word \"rehearsal\" (second paragraph) is closest in meaning to:","opts":["Practice session","Performance","Audition","Event"],"ans":0}]},{"id":11,"title":"Buford Valley Daily News — Cezanta Airline Strategy","questions":[{"q":"What does Mr. Daly suggest?","opts":["Passengers opinions influence aircraft design","Cezanta's revenues will increase right away","Other airlines will try to match Cezanta's prices","Smaller airlines will be bought by their larger competitors"],"ans":2},{"q":"What can be inferred about Buford Valley?","opts":["Cezanta will cut the price in December","It is the site of a new airport","Cezanta will not fly there next year","Cezanta will move its headquarters there"],"ans":0},{"q":"The word \"offset\" (5 lines from the end of the text) is closest in meaning to:","opts":["Counterpart","Terminate","Outweigh","Stop"],"ans":3}]},{"id":12,"title":"Marshall and Young — Personnel News","questions":[{"q":"How many people from Product Design were promoted?","opts":["None","One","Three","Two"],"ans":1},{"q":"Who will be leading the Consumer Products department along with Eugene?","opts":["Constance Hayes","Gary Shepherd","The Senior VP","Jordan Jones"],"ans":0},{"q":"The word \"appointment\", first line of the text, is here closest in meaning to:","opts":["Lay-off","Date","Nomination","Meeting"],"ans":2}]},{"id":13,"title":"Lasell Inc. — Product Replacement","questions":[{"q":"What is the purpose of this letter?","opts":["To introduce a policy change","To announce a replacement plan","To respond to a customer complaint","To invite customers to an in-store event"],"ans":1},{"q":"What should the reader do?","opts":["Pick up a gift in the office","Call to schedule a pickup","Submit a copy of the receipt","Report problems immediately"],"ans":1},{"q":"The word \"commendation\" at the beginning of the text, is closest in meaning to:","opts":["Enforcement","Praise","Rule","Advice"],"ans":3}]},{"id":14,"title":"Andrew Mathers — Arrival in Tokyo","questions":[{"q":"Where will Andrew Mathers most likely be on Tuesday morning?","opts":["Tokyo","New York","Seoul","San Francisco"],"ans":2},{"q":"Due to which of the following reasons is Andrew Mathers changing his plans?","opts":["He thinks Alice Lang can do a better job","He decided to take a last minute vacation","He didn't want to meet Mr. Bayer","He has to attend an emergency meeting"],"ans":3},{"q":"The word \"leg\", end of paragraph 2, is closest in meaning to:","opts":["Trip","Plane","Step","Time"],"ans":0}]},{"id":15,"title":"Alberta Bank — New ATM Card","questions":[{"q":"What was enclosed with this letter?","opts":["A Personal Identification Number","A new Bank Card","An expiration notice","A bank statement"],"ans":1},{"q":"If this card is a replacement for a lost card, what must the customer do?","opts":["Begin using the card as usual","Pick up a new card","Call Alberta Bank","Visit an Alberta Bank branch"],"ans":2},{"q":"The word \"ATM\" (first line of first paragraph) is closest in meaning to:","opts":["Bank teller","Cash dispenser","Money withdrawal","Bank clerk"],"ans":1}]},{"id":16,"title":"Using City Buses — Hilda Braid","questions":[{"q":"What caused Hilda to feel embarrassed when she took the bus?","opts":["She kept dropping her coins","She lost her bus card","She got off at the wrong stop","She didn't have enough coins"],"ans":0},{"q":"What has been the result of the introduction of bus cards?","opts":["Older people no longer take buses","People have complained because the card is too expensive","Older people are using the bus more frequently","Hilda Braid has dropped her card"],"ans":2},{"q":"The word \"fare\" (line 1) is closest in meaning to:","opts":["Fee","Card","Journey","Ticket"],"ans":0}]},{"id":17,"title":"Juneco — Brand Manager Position","questions":[{"q":"In which Juneco division will the successful applicant probably work?","opts":["International marketing","Accounting","Production","Human resources"],"ans":0},{"q":"What is NOT a stated job responsibility?","opts":["Working with sales representatives","Creating marketing plans","Increasing product recognition domestically","Evaluating market opportunities"],"ans":2},{"q":"The word \"foster\" in paragraph 2 is closest in meaning to:","opts":["Substitute","Measure","Cherish","Encourage"],"ans":3}]},{"id":18,"title":"Food & Beverage Services — Food Hygiene Memo","questions":[{"q":"Why was this memo sent?","opts":["Because customers have been praising the food","Because there have been several complaints from customers","Because Food & Beverage Services sends a memo every month","Because the kitchen will soon be closed for renovations"],"ans":1},{"q":"Who might be at fault in this situation?","opts":["All the kitchen staff","Someone who works on Thursdays and Fridays","The chef","A waiter"],"ans":1},{"q":"The word \"narrow down\" here, end of the second paragraph, is closest in meaning to:","opts":["Cut","Limit","Top","Start"],"ans":0}]},{"id":19,"title":"Travel Memo — Alistair Black's Italy Trip","questions":[{"q":"To whom will Alistair Black be making presentations?","opts":["Maria Modesta","Employees at two factories","Paolo Svegli and the chief Engineers","The Board of Directors and the Export Division"],"ans":2},{"q":"How long will Mr Black spend sightseeing?","opts":["No time during this trip","Several hours","3 days and 2 nights","One full day"],"ans":1},{"q":"The word \"sightseeing\" here, in the last paragraph, is closest in meaning to:","opts":["Breathing","Shopping","Travel","Tourism"],"ans":1}]},{"id":20,"title":"Conference of Newspaper Reporters — Evaluation","questions":[{"q":"What seminar did the evaluator find least helpful?","opts":["Developing story ideas","Legal issues in journalism","Communicating with politicians","Winning news photos"],"ans":0},{"q":"What most likely is Mark Stephen's occupation?","opts":["Politician","History teacher","Hotel manager","Photographer"],"ans":3},{"q":"The word \"attending\" (line 1 of paragraph 1) is closest in meaning to:","opts":["Booking","Enrolling","Enjoying","Participating"],"ans":3}]},{"id":21,"title":"Ms. Jacobsen & Ms. Evans — Car Insurance Email","questions":[{"q":"What does Ms. Jacobsen ask Ms. Evans to do?","opts":["File information about a customer","Contact a customer about a new policy","Compose an e-mail message to a customer","Provide a customer with a price quote"],"ans":2},{"q":"What information about the car is NOT given?","opts":["Its color","Its purchase date","Its price","Its licence plate number"],"ans":2},{"q":"The word \"comprehensive\" (line 5 of second paragraph) is closest in meaning to:","opts":["Complete","Expensive","Understandable","Affordable"],"ans":0}]},{"id":22,"title":"Justin & Vera — Phone Message","questions":[{"q":"What was Justin doing when Vera called?","opts":["Talking on another line","Attending a meeting","Resting at home","Having lunch"],"ans":3},{"q":"Why didn't Vera send the files earlier?","opts":["She didn't want to","She was away on a business trip","She forgot about them","She has been busy"],"ans":3},{"q":"The word \"courier\" here, line 2, is closest in meaning to:","opts":["Delivery service","E-mail","Fax","Post-mail"],"ans":1}]},{"id":23,"title":"Josh — Hospital Restaurant Application","questions":[{"q":"What does Josh suggest in the message?","opts":["More time to obtain a recommendation letter","Permission to miss the orientation and training","Special consideration for his late application","A specific shift in the hospital restaurant"],"ans":2},{"q":"What did Josh do during the last two weeks?","opts":["He was on holiday","He worked to his restaurant","He helped at the community newspaper","He attended an orientation session"],"ans":0},{"q":"In paragraph 3, the word \"Limited\" is closest in meaning to:","opts":["Shared","Restricted","Adequate","Unavailable"],"ans":1}]},{"id":24,"title":"Vacation Request Memo","questions":[{"q":"Who will be receiving vacation requests?","opts":["Temporary employees","All employees","The office manager","The personnel secretary"],"ans":2},{"q":"According to the memo, what problem often occurs?","opts":["Employees do not schedule enough vacation time","Departmental managers often rejects requests for time off","Vacation time is used too early in the year","There is difficulty scheduling vacations at year's end"],"ans":3},{"q":"The word \"promptly\" (first line of the large paragraph) is closest in meaning to:","opts":["Always","Swiftly","Often","Thoroughly"],"ans":1}]},{"id":25,"title":"Darnley's Dairy — Delivery Service","questions":[{"q":"What is the purpose of this form?","opts":["To reduce delivery times","To catch customers who haven't paid their bills","To thank customers","To improve the delivery service"],"ans":3},{"q":"How much does Darnley's charge for home delivery?","opts":["It depends on the item","$1 per item","Nothing","It doesn't say"],"ans":2},{"q":"The word \"dairy\" (title) is closest in meaning to:","opts":["Notebook","Farm","Creamery","Cow"],"ans":2}]},{"id":26,"title":"Regal Hotel — Holiday Advertisement","questions":[{"q":"Based on the information in the passage, to which holiday does the advertisement refer?","opts":["Easter","Christmas","We don't know","Summer"],"ans":1},{"q":"Which of the following can be inferred from the passage about the Regal Hotel?","opts":["It's going to provide guests with a free meal","It is going to increase the family rate","It is going to close down the outdoor pools temporarily","It is going to allow the guests to cook in their room"],"ans":0},{"q":"The word \"workout\" (line 7 of paragraph 1) is closest in meaning to:","opts":["Balcony","Bodybuilding","Outdoor","Luxury"],"ans":1}]},{"id":27,"title":"Cezanta Airlines — Aircraft Modernization","questions":[{"q":"What does Cezanta plan to do?","opts":["Expand its service on less-traveled routes","Eliminate business-class and first-class seating","Reduce the number of its international flights","Modernize the inside of its aircraft"],"ans":3},{"q":"What is suggested about the airline's new policy?","opts":["Customers will be offered better fares","Ticketing fees will be eliminated","Traveling by plane will be made easier","Customers will be offered more routes"],"ans":3},{"q":"The word \"cut\" (line 3) is closest in meaning to:","opts":["Increase","Decrease","Lose","Keep"],"ans":1}]},{"id":28,"title":"Newspaper Advertising Information","questions":[{"q":"Who is this information intended for?","opts":["Editors","Lawyers","Photographers","Advertisers"],"ans":3},{"q":"What policy is stated in the information?","opts":["Payment may be made after publication","A late fee may be applied","Color advertisements are more expensive","A picture may be submitted"],"ans":3},{"q":"The word \"prices\" here is closest in meaning to:","opts":["Currency","Cash","Prizes","Fees"],"ans":2}]},{"id":29,"title":"Grant Manufacturing — Job Opportunity","questions":[{"q":"Which of the following benefits is NOT mentioned?","opts":["Health insurance","Child care","Pension","Subsidized transportation"],"ans":3},{"q":"Who should NOT apply for this job?","opts":["People interested in promotion in their job","Engineering graduates","People who previously applied for a job at Grant Manufacturing","People who like a challenging environment"],"ans":2},{"q":"The word \"quarterly\" here, line 4 of the second paragraph, is closest in meaning to:","opts":["3 times a year","4 times a month","Every 4 months","Every 3 months"],"ans":3}]},{"id":30,"title":"TDM News — Computer Magazine","questions":[{"q":"About how much does three months of storage cost for customers who subscribe by July 30?","opts":["$120","$180","$59.95","$39.95"],"ans":0},{"q":"What is NOT featured in TDM News?","opts":["Discussions about computer equipment","Job opportunities for computer technicians","Assessments of new software","Technical support questions and answers"],"ans":1},{"q":"The word \"facilities\" in the first paragraph is closest in meaning to:","opts":["Easyness","Opportunity","Equipment","Industry"],"ans":2}]},{"id":31,"title":"City Council — Tunnel Project","questions":[{"q":"What is true about the city council?","opts":["It plans to build more shops and restaurants","It has voted to approve the tunnel project","It has met with the leaders of RTS","It has been working with Yanco Builders"],"ans":3},{"q":"What did Mr. Young say about the tunnel project?","opts":["It will create more jobs in the suburbs","It will completed later than expected","It will be good for the downtown economy","It will replace the existing bridge"],"ans":2},{"q":"The word \"jams\" (second line of second column) here is closest in meaning to:","opts":["Roadworks","Accidents","Congestion","Delays"],"ans":2}]},{"id":32,"title":"Katherine Potter — Flight Reservation","questions":[{"q":"Why did Katherine Potter call?","opts":["To ask Mr Maxwell to call Mr Hill","To confirm William Maxwell's flight reservation","To inform William Maxwell that his flight is not confirmed","To make a booking"],"ans":1},{"q":"Who will be traveling?","opts":["Only Joseph Hill","William Maxwell and Joseph Hill","David Sales and William Maxwell","Joseph Hill and Katherine Potter"],"ans":1},{"q":"The expression \"return a call\" is closest in meaning to:","opts":["Call again","Reject","Call back","Not Answer"],"ans":1}]},{"id":33,"title":"Cruizin Cruises — Young Adults Cruise","questions":[{"q":"Who do Cruizin Cruises hope to attract?","opts":["Young families","People in their twenties","Elderly people","Teenagers"],"ans":1},{"q":"Who among the following would be interested in this cruise?","opts":["Someone interested in museums and art galleries","Someone who enjoys nightclubs and parties","Someone who enjoys sightseeing tours","Someone who wants a quiet getaway"],"ans":1},{"q":"The word \"parasailing\" here, line 1 of paragraph 2, is closest in meaning to:","opts":["Go shopping","Go fishing","Go parascending","Go snorkeling"],"ans":2}]},{"id":34,"title":"Ms. Young — Bank Fee Inquiry","questions":[{"q":"Why did Ms. Young write to the bank?","opts":["To transfer $500 into an account","To inquire about an unexplained deposit","To ask about a fee","To close an account"],"ans":2},{"q":"Why is Ms. Young so surprised?","opts":["That's the first time a fee is charged","She recently put $500 into her account","$30 is very expensive for a service","She's been asking an explanation for 5 years"],"ans":0},{"q":"The word \"terms\" in paragraph 1 is closest in meaning to:","opts":["Expressions","Agreements","Conditions","Periods"],"ans":2}]},{"id":35,"title":"Library Sub-Committees Memo","questions":[{"q":"What is the name of the person on top of the chart?","opts":["Allie Green","Brian Kingston","Alex Farino","City Council"],"ans":2},{"q":"What is the purpose of this memo?","opts":["To explain the library sections","To remind members of the next meeting","To remind the members of whom to contact about problems","To thank the members of the library sub-committees"],"ans":0},{"q":"The word \"chairperson\" (penultimate line of the text) is closest in meaning to:","opts":["Director","Employees","Craftsman","Secretary"],"ans":0}]},{"id":36,"title":"Water Park Opening — Newspaper Article","questions":[{"q":"What does the article imply about the opening day of the water park?","opts":["It had to be postponed by one month","It was attended by celebrities","It did not generate much interest","It was not advertized on television"],"ans":1},{"q":"What were people concerned about regarding the water park?","opts":["The building design","The cost of construction","The safety code","The choice of location"],"ans":3},{"q":"The word \"dispense\", line 7, is closest in meaning to:","opts":["Cause","Avoid","Manage","Create"],"ans":2}]},{"id":37,"title":"Cleaning Schedule — Team Members","questions":[{"q":"What area is James responsible for cleaning between 1:00 pm and 3:00 pm?","opts":["The third floor kitchens","The first floor meeting rooms","The second floor break rooms","The fourth floor hallways"],"ans":0},{"q":"Who is not authorized to approve a break?","opts":["Craig Morgan","Vincent Warren","Amy Hiam","Dean Jones"],"ans":0},{"q":"The word \"entitled\" (penultimate line of the text) is closest in meaning to:","opts":["Asked","Authorized","Hired","Payed"],"ans":1}]},{"id":38,"title":"Airport Transportation Information","questions":[{"q":"On whose website would this information most likely be found?","opts":["NACU","Regency Hotel","Airporter","Sky High Air"],"ans":3},{"q":"How long does it take to drive to downtown hotels from the airport?","opts":["15 minutes","45 minutes","30 minutes","20 minutes"],"ans":1},{"q":"The word \"serve\" in paragraph 1, line 1, is closest in meaning to:","opts":["Give out","Obey","Operate","Wait on"],"ans":2}]},{"id":40,"title":"Brian — Recording Email","questions":[{"q":"How many voices will be used in the advertisement?","opts":["Two","Five","Four","Three"],"ans":1},{"q":"Why does Brian want to finish the recording quickly?","opts":["He is impatient","He hates recording","He wants to save money","He has another appointment afterwards"],"ans":2},{"q":"The word \"charging\" here, line 4 of the body of the e-mail, is closest in meaning to:","opts":["Billing","Purchasing","Paying","Discounting"],"ans":0}]},{"id":41,"title":"Meeting Minutes — Jenny to John","questions":[{"q":"What has been the result of the Chain of Command system?","opts":["Nothing of great value","Less employees being fired","A new chair being elected for the finance committee","Better communications and fewer errors"],"ans":3},{"q":"What can be inferred from the letter?","opts":["Neither John nor Jenny attended the meeting","Jenny, but not John, attended the meeting","Both John and Jenny attended the meeting","John, but not Jenny, attended the meeting"],"ans":1},{"q":"The word \"minutes\" here, first line of first paragraph, is closest in meaning to:","opts":["Expectations","Written records","Deadlines","Times"],"ans":1}]},{"id":42,"title":"Mike O'Malley — Shipment Change","questions":[{"q":"Why did Mike O'Malley contact Scott Abernathy?","opts":["To change a shipping order","To place a furniture order","To invite him to the factory","To cancel a shipment"],"ans":0},{"q":"Who is Vincent Balasco?","opts":["A furniture store owner","A lamp shade manufacturer","A truck driver","A warehouse clerk"],"ans":0},{"q":"The word \"warehouse\", line 3 of the first paragraph, is closest in meaning to:","opts":["Depository","Shop","Factory","Office"],"ans":0}]},{"id":43,"title":"Obtaining Certified Vital Records","questions":[{"q":"What is the purpose of this notice?","opts":["To provide directions to an office","To explain how to obtain certain official records","To describe a new government facility","To announce a recent price increase"],"ans":1},{"q":"What information must accompany each request?","opts":["Two copies of recent tax returns","A letter written on business stationery","Identification that includes a photograph","The applicant's telephone number"],"ans":2},{"q":"The word \"charge\" (last line of the first part) is closest in meaning to:","opts":["Letter","Request","Fee","Time"],"ans":2}]}];
+const RAW_T=[{"title":"Online Banking Growth","text":"The number of American households doing their banking online grew by 39.2 percent last year. Experts predict that number to increase by a ..1.. 22.5 percent this year, and another 17.6 percent the year after.\n\nA total of 33.2 million American households are currently banking online. Young adults aged between 24 and 35 with household incomes of $75,000 or higher are ..2.. to do their banking online. Today, nearly ..3.. that group (48 percent) views bills online, and 46 percent pays bills online.\n\nOlder adults, those over 65, at all income levels, are the least likely to bank online.\n\nA representative for the American Association of Online Bankers says banks ..4.. their customers to bank online, \"because online banking is much cheaper for banks to provide than traditional in-person teller services.\"","gaps":[{"id":1,"opts":["superior","larger","further","more"],"ans":"further","expl":"\"A further 22.5 percent\" = un 22,5% supplementaire. \"Further\" exprime une addition/un complement."},{"id":2,"opts":["the most likely","the more likely","most likelier","more likelier"],"ans":"the most likely","expl":"Superlatif: \"the most likely\". On ne dit jamais \"likelier\" avec \"the most/more\"."},{"id":3,"opts":["half","two times","twice","double"],"ans":"half","expl":"48% ≈ la moitie (half). \"Nearly half that group\" = presque la moitie de ce groupe."},{"id":4,"opts":["have been encouraged","to encourage","are encouraging","encouragement"],"ans":"are encouraging","expl":"\"Banks are encouraging their customers\" = les banques encouragent (present progressif actif)."}]},{"title":"iTecho Auto Shop — Order #45233","text":"From: jacobw@itecho.com\nTo: yilin@automasters.biz\nDate: 4/15/2015\nRe: Order #45233\n\nDear Ms. Gao,\n\nThank you for your recent order of brake pads and replacement windshield wipers from iTecho Auto Shop. Unfortunately, we are unable to send you the merchandise because your company credit card has ..1.. . If you would still like to ..2.. this order, please let us know so that we may hold these ..3.. for you.\n\nYou can provide another credit card number, send us a check, or use any other ..4.. form of payment, and we will be happy to process your order immediately.\n\nRegards, Jacob Weisberg\nCustomer Service\niTecho Auto Shop","gaps":[{"id":1,"opts":["expiration","expired","expiring","expires"],"ans":"expired","expl":"\"has expired\" = present perfect. La carte a expire."},{"id":2,"opts":["place","check","send","remember"],"ans":"place","expl":"\"Place an order\" = passer une commande. C'est l'expression idiomatique correcte."},{"id":3,"opts":["parts","plans","qualities","reservations"],"ans":"parts","expl":"On parle de brake pads et wipers = des pieces auto. \"Hold these parts\" = garder ces pieces."},{"id":4,"opts":["capable","acceptable","proficient","acquainted"],"ans":"acceptable","expl":"\"Acceptable form of payment\" = mode de paiement acceptable/valide."}]},{"title":"Sid's Stationery — Holiday Sale","text":"Sid's Stationery\n2 Smythe St, Toronto, Canada M1B 5T6\nTel: (416) 295-1725\nDecember 1st, 20\n\nDear Ms. Michaels: Seasons Greetings.\n\nHoliday Sale\n\nAs a ..1.. customer, we wanted you to be among the first to know about our upcoming holiday sale. All craft paper, specialty printer paper, and decorative envelopes will be reduced by 50% for the month of December.\n\nAs per tradition at Sid's Stationery, we will be having a Christmas raffle. This year the grand prize is a 2-night stay for two at the Meridian Inn ..2.. Toronto Island. The winner will receive a free double occupancy stay in the penthouse suite as well as a free dinner on the moonlit patio.\n\nMoney from ticket sales will be ..3.. to The Family Foundation, a local organization that provides food and clothing to those who need it most this Christmas. We look forward ..4.. you this Christmas season.\n\nYours truly, Sid and Sandy Chester","gaps":[{"id":1,"opts":["value","valid","validate","valued"],"ans":"valued","expl":"\"Valued customer\" = client estime/apprecie. Expression tres courante en business."},{"id":2,"opts":["at","over","through","on"],"ans":"on","expl":"On utilise \"on\" avec les iles: \"on Toronto Island\"."},{"id":3,"opts":["funded","donated","purchased","collect"],"ans":"donated","expl":"\"Will be donated to\" = sera reverse/donne a. Voix passive correcte."},{"id":4,"opts":["seeing","to seeing","see","to see"],"ans":"to seeing","expl":"\"Look forward to + V-ing\" : \"look forward to seeing you\" = on a hate de vous voir."}]},{"title":"Sporting Goods Store — Holiday Prices","text":"To: elenandfamily\nFrom: salesrep234\nRe: Holiday Prices\n\nDear Customer,\n\nOur records show that you are among the top ten percent of our valuable customers for this year. As a preferred customer, you are eligible ..1.. special holiday discounts. You will receive 10% off all your online purchases made in December. This 10% can be combined with any online promotion. These are our ..2.. prices ever.\n\nWhen you log in, please identify yourself as a preferred customer by using this special login ID: XP3744. You should not share this login ID with your friends or family, but you ..3.. purchase gifts for them.\n\nWhen you use your preferred login ID, you will not only receive our best price but you will also get double bonus points that you can ..4.. future purchases. With 600 bonus points you could purchase a set of golf clubs for just $499. For 10,000 points, you can get a golf cart for $1,525.\n\nThank you for your continued business. We look forward to serving you.\n\nThe Sporting Goods Store Staff","gaps":[{"id":1,"opts":["to receive","for receiving","having received","received"],"ans":"to receive","expl":"\"Eligible to receive\" = eligible pour recevoir. \"Eligible\" + to + infinitif."},{"id":2,"opts":["lowest","low","more low","lowering"],"ans":"lowest","expl":"Superlatif de \"low\" = \"lowest\". \"Our lowest prices ever.\""},{"id":3,"opts":["had better","may","would","will"],"ans":"may","expl":"\"You may purchase\" = vous pouvez acheter (permission). \"Will\" serait trop affirmatif ici."},{"id":4,"opts":["cumulate to","apply to","recuperate to","use to"],"ans":"apply to","expl":"\"Apply points to purchases\" = appliquer des points a des achats. Expression standard."}]},{"title":"Discount Shoe Emporium — Flyer Misprint","text":"DISCOUNT SHOE EMPORIUM\nMEMORANDUM\nTO: Sales Staff\nFROM: Management B.K.\nDATE: OCTOBER 9th, 20\nSUBJECT: FLYER MISPRINT\n\nPlease be aware that there was a misprint in an advertisement for our store in this week's local free press. The ad states that on Saturday all men's formal footwear is on for 55% percent off rather ..1.. 15% off.\n\nIf customers come in and ask about this sale, please ..2.. and explain the printing error. Offer them an additional 5% off coupon ..3.. for coming into our store. The coupon can be given out even if the customer decides not to purchase any shoes.\n\nPlease call a manager to the sales floor ..4.. you encounter any customers who have the ad with them and demand to receive the 55% discount. These cases will be handled on an individual basis.\n\nThank you.\n\nB.K.","gaps":[{"id":1,"opts":["that","they're","than","then"],"ans":"than","expl":"\"Rather than\" = plutot que. Comparaison. \"They're\" = they are, ca n'a pas de sens ici."},{"id":2,"opts":["analyze","categorize","compromise","apologize"],"ans":"apologize","expl":"\"Please apologize\" = veuillez vous excuser. Face a un client mecontent, on s'excuse."},{"id":3,"opts":["to thanks them","thank them","to thank them","thanks them"],"ans":"to thank them","expl":"Infinitif de but: \"to thank them\" = pour les remercier. La structure est: coupon + to + verbe."},{"id":4,"opts":["because","before","whether","if"],"ans":"if","expl":"\"Call a manager if you encounter...\" = appelez un manager si vous rencontrez..."}]},{"title":"Customs Declaration — Airplane","text":"All passengers are required to complete the customs declaration form before entering the United States.\n\nYou should find a copy of this form inside the seat pocket in front of you; ..1.. , if there is no form please ask a member of the cabin crew for one before arrival at your final destination.\n\nPassengers who are not U.S. citizens or who are not permanent residents of the United States are required ..2.. either a white I-94 form ..3.. a green I-94W form. Passengers traveling on a visa must complete the white form.\n\nIf you do not require a visa, you must still have a valid machine-readable passport and complete the green I-94 form. All forms must be ..4.. in block capital using a black or blue pen.","gaps":[{"id":1,"opts":["however","moreover","therefore","furthermore"],"ans":"however","expl":"\"However\" = cependant. Introduit une opposition: vous devriez trouver le formulaire, cependant si non..."},{"id":2,"opts":["to fill up","filling in","to fill out","fill"],"ans":"to fill out","expl":"\"Required to fill out\" = obliges de remplir. \"Fill out a form\" est l'expression correcte pour les formulaires. \"Fill up\" est pour les reservoirs."},{"id":3,"opts":["or","and","nor","but"],"ans":"or","expl":"\"Either... or...\" = soit... soit... Structure correlative standard."},{"id":4,"opts":["completed","completing","complete","completion"],"ans":"completed","expl":"\"Must be completed\" = doivent etre remplis. Voix passive (be + participe passe)."}]},{"title":"TigerNet — Our Future","text":"To: All TigerNet employees\nFrom: John Sullivan, CEO\nDate: April 4, 2010\nSubject: Our Future\n\nThe recent collapse of our biggest competitor has many of you wondering whether the same thing could happen here. I would like to set the record straight. Today, TigerNet is positioned for ..1.. . We are the market leader with the highest quality, most functionally complete products and proven technology, ..2.. , the most experienced and dedicated workforce, and the most tried, tested, and proven management team in the industry.\n\nWhile the severe current conditions have weakened many of our competitors, indeed, dozens of internet service providers both small and large have ..3.. from the marketplace, we are increasing our market share.\n\nAs the market continues to consolidate TigerNet will actually grow. We see enormous business opportunities ahead, and expect ..4.. to thrive for at least the next several years. Our future is bright.","gaps":[{"id":1,"opts":["success","succeed","successful","successfully"],"ans":"success","expl":"\"Positioned for success\" = positionne pour le succes. Apres \"for\" on utilise un nom."},{"id":2,"opts":["the strongest balance sheet and financial viability","a strong balance sheet","strong finances","financial success"],"ans":"the strongest balance sheet and financial viability","expl":"Cette option maintient le parallelisme avec les autres superlatifs dans la phrase (highest, most...)."},{"id":3,"opts":["withdrawn","withdrew","withdrawing","withdraw"],"ans":"withdrawn","expl":"\"Have withdrawn\" = present perfect. Le participe passe de \"withdraw\" est \"withdrawn\"."},{"id":4,"opts":["the company","our company","this company","a company"],"ans":"the company","expl":"\"Expect the company to thrive\" = s'attendre a ce que la societe prospere. \"The company\" est le plus naturel dans ce contexte formel."}]},{"title":"Dogorail — Transport Exhibition","text":"Dogorail would like to invite its business associates to the 25th Dogorail Transport and Logistics Exhibition scheduled for November 9 to 11 in Prague.\n\nDogorail will be displaying its products and services on the main floor of the Zidenic Convention Center ..1.. the three-day event, and there will be a special presentation by Dogorail CEO Miroslav Sergeyev on the final night.\n\n..2..\n\nRepresentatives from Dogorail will be in attendance to assist visitors with their queries.\n\nPrivate ..3.. on any of our offerings are welcome if you wish to obtain advice about your particular requirements.\n\nTo confirm your attendance to this event, please return the enclosed form, ..4.. filled out and with your signature appended, on or before April 30.","gaps":[{"id":1,"opts":["throughout","during","while","within"],"ans":"throughout","expl":"\"Throughout the event\" = tout au long de l'evenement. Insiste sur la duree complete."},{"id":2,"opts":["Dogorail products will be unveiled to event invitees once he has finished.","New products will launch after the event.","Products are on display now.","The presentation will cover new services."],"ans":"Dogorail products will be unveiled to event invitees once he has finished.","expl":"Cette phrase fait reference a la presentation du CEO et annonce le devoilement des produits apres son discours."},{"id":3,"opts":["consultations","conversations","conferences","conclusions"],"ans":"consultations","expl":"\"Private consultations\" = consultations privees. Terme professionnel pour un conseil personnalise."},{"id":4,"opts":["fully","full","fulfill","fulfilment"],"ans":"fully","expl":"\"Fully filled out\" = entierement rempli. \"Fully\" est un adverbe qui modifie \"filled out\"."}]},{"title":"Employee Handbook — Susan Ward","text":"To: All staff\nFrom: Susan Ward\nSubject: Employee handbook\nDate: April 15\n\nThank you to everyone who participated in the discussions with company management. Your comments about some employees being unaware of the procedures for day-to-day operations have been heard. We are now working to ..1.. the situation.\n\nFor starters, we will be publishing the company's standard operating procedures as soon as possible. A printed guide will give management and staff an official reference on the performance of daily tasks.\n\n..2..\n\nHopefully, it will help move us closer to our goal of having firmly ..3.. policies.\n\nIf any revisions are required, these will be incorporated into a later version of the manual. The final version will also be ..4.. through the company's internal network. If you have any questions, please direct them to your departmental supervisors.","gaps":[{"id":1,"opts":["address","solve","manage","handle"],"ans":"address","expl":"\"Address the situation\" = traiter/aborder la situation. Tres courant en contexte professionnel."},{"id":2,"opts":["A provisional copy of this handbook will be distributed at the next meeting.","The handbook is ready for download.","We will email the handbook.","Contact HR for a copy."],"ans":"A provisional copy of this handbook will be distributed at the next meeting.","expl":"Cette phrase s'inscrit logiquement entre l'annonce de la publication et l'espoir que ca aide."},{"id":3,"opts":["establishment","established","establishing","establish"],"ans":"established","expl":"\"Firmly established policies\" = des politiques fermement etablies. On a besoin du participe passe comme adjectif."},{"id":4,"opts":["accessible","accessed","accessing","access"],"ans":"accessible","expl":"\"Be accessible\" = etre accessible. Adjectif apres \"will be\"."}]},{"title":"Peacelink — Connection Problems","text":"Most connection problems ..1.. by trying one of the following:\n\n1. Power cycle: Shut off both the modem and the computer and wait for 30 seconds. Turn the modem back on first, and then turn on the computer. After the PPPoE light stops ..2.. and stays on, you can reconnect to the internet.\n\nNOTE: If your modem does not have an on/off switch, ..3.. the modem from the electrical wall outlet to turn it off.\n\n2. Check for line interference: Make sure your modem is not on or ..4.. other electrical devices that may interfere with the signal. This includes your computer monitor, stereo speakers, cordless phone (or its base), or a halogen light.\n\n3. Call the Peacelink Telephone Support Center: You can talk to a technical support representative.","gaps":[{"id":1,"opts":["can be solved","are solving","will solve","have solved"],"ans":"can be solved","expl":"\"Can be solved\" = peuvent etre resolus. Voix passive avec modal."},{"id":2,"opts":["blinking","blinked","blinks","to blink"],"ans":"blinking","expl":"\"Stops blinking\" = arrete de clignoter. Apres \"stop\" + V-ing pour une action qui cesse."},{"id":3,"opts":["unplug","disconnect","remove","detach"],"ans":"unplug","expl":"\"Unplug the modem\" = debrancher le modem. Terme technique standard."},{"id":4,"opts":["near","next","close","beside"],"ans":"near","expl":"\"On or near other devices\" = sur ou pres d'autres appareils. \"Near\" fonctionne directement comme preposition."}]},{"title":"Professor Clarke — Christian Miller","text":"Dear Professor Clarke,\n\nI am a recent ..1.. of the University of Tayforth, where I obtained a first-class honors degree in biotechnology. As a ..2.. motivated individual, I felt that I should contact you directly rather than simply wait for a vacancy to be posted.\n\nIt is specifically for that reason that I ..3.. to you to inquire whether there are any available positions on your research team.\n\nAfter following your work and achievements closely over the past few years, I feel that I could greatly benefit from your expertise in a working laboratory environment. I hope that one day in the future I can work ..4.. you and learn many things from you.\n\nKind regards,\n\nChristian Miller","gaps":[{"id":1,"opts":["graduate","graduation","graduated","graduating"],"ans":"graduate","expl":"\"A recent graduate\" = un(e) recent(e) diplome(e). Nom apres l'article \"a\"."},{"id":2,"opts":["highly","high","higher","highest"],"ans":"highly","expl":"\"Highly motivated\" = tres motive. \"Highly\" est l'adverbe qui modifie \"motivated\"."},{"id":3,"opts":["am writing","write","wrote","have written"],"ans":"am writing","expl":"\"I am writing to you\" = je vous ecris (en ce moment). Present continu pour une action en cours."},{"id":4,"opts":["alongside","beside","among","between"],"ans":"alongside","expl":"\"Work alongside you\" = travailler a vos cotes. \"Alongside\" implique collaboration."}]}];
+
+/* ---------- utils ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const LT='ABCD';
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const fmtTime=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+
+/* Extract the sentence(s) around a gap so a Text Completion item can be played on its own. */
+function snippet(text,gid){
+  const paras=text.split(/\n+/).map(s=>s.trim()).filter(Boolean).map(p=>p.replace(/\.\.(\d+)\.\./g,'§$1§'));
+  const mk='§'+gid+'§';
+  const pi=paras.findIndex(p=>p.includes(mk));
+  if(pi<0)return mk;
+  const p=paras[pi];
+  if(p.replace(mk,'').trim()==='')return [paras[pi-1],p,paras[pi+1]].filter(Boolean).join('\n');
+  const sents=p.split(/(?<=[.!?])\s+(?=[A-Z"])/);
+  const si=sents.findIndex(s=>s.includes(mk));
+  const parts=[];
+  if(si>0)parts.push(sents[si-1]);
+  parts.push(sents[si]);
+  if(si<sents.length-1&&parts.join(' ').length<160)parts.push(sents[si+1]);
+  return parts.join(' ');
+}
+
+/* ---------- data ---------- */
+const SECTIONS={
+  r:{name:'Reading Comprehension',short:'Reading',icon:'📖',unit:'questions',
+     texts:RAW_R.map(x=>({num:x.id,title:x.title,body:null,
+       items:x.questions.map((q,j)=>({key:'r'+x.id+'_'+j,sec:'r',label:'Q'+(j+1),prompt:q.q,opts:q.opts,ans:q.ans,expl:null,title:x.title,num:x.id}))}))},
+  t:{name:'Text Completion',short:'Completion',icon:'✍️',unit:'trous',
+     texts:RAW_T.map((x,i)=>({num:i+1,title:x.title,body:x.text,
+       items:x.gaps.map(g=>({key:'t'+(i+1)+'_'+g.id,sec:'t',gid:g.id,label:'Trou '+g.id,prompt:null,snippet:snippet(x.text,g.id),opts:g.opts,ans:g.opts.indexOf(g.ans),expl:g.expl,title:x.title,num:i+1}))}))}
+};
+const ITEMS={};
+Object.values(SECTIONS).forEach(s=>s.texts.forEach(t=>t.items.forEach(it=>ITEMS[it.key]=it)));
+
+const MODES={
+  classic:{name:'Classique',icon:'📚',kind:'text',desc:'Texte par texte, dans l’ordre.'},
+  random:{name:'Aléatoire',icon:'🎲',kind:'text',desc:'Textes tirés au hasard, réponses mélangées.'},
+  mix:{name:'Mélange',icon:'🔀',kind:'flash',desc:'Toutes les questions mélangées, correction immédiate.'},
+  rush:{name:'Rush',icon:'⏱️',kind:'flash',desc:'Max de bonnes réponses avant la fin du chrono. Erreur = −5 s.'},
+  survival:{name:'Survie',icon:'❤️',kind:'flash',desc:'3 vies. Jusqu’où tu tiens ?'},
+  errors:{name:'Mes erreurs',icon:'🎯',kind:'flash',desc:'Rejoue uniquement les questions ratées.'}
+};
+
+let cfg=Object.assign({sec:'r',mode:'classic',count:'all',shuffleOpts:true,rushTime:180},store.get('eq_cfg',{}));
+let S=null;
+
+const errKey=sec=>'eq_err_'+sec;
+const getErrors=sec=>store.get(errKey(sec),[]).filter(k=>ITEMS[k]);
+function markError(it,wrong){
+  const set=new Set(getErrors(it.sec));
+  wrong?set.add(it.key):set.delete(it.key);
+  store.set(errKey(it.sec),[...set]);
+}
+const bestKey=()=>S.sec+'_'+S.mode+(S.mode==='rush'?'_'+S.rushTime:'');
+
+function screen(id){['home','play','results'].forEach(x=>$('#'+x).classList.toggle('hidden',x!==id));window.scrollTo({top:0,behavior:'smooth'})}
+
+/* ---------- home ---------- */
+function renderHome(){
+  if(S&&S.timer)clearInterval(S.timer);
+  S=null;
+  document.body.dataset.sec=cfg.sec;
+  store.set('eq_cfg',cfg);
+  const sec=SECTIONS[cfg.sec],m=MODES[cfg.mode];
+  const errs=getErrors(cfg.sec).length;
+  if(cfg.mode==='errors'&&!errs)cfg.mode='classic';
+  const tabs=Object.entries(SECTIONS).map(([k,s])=>{
+    const n=s.texts.reduce((a,t)=>a+t.items.length,0);
+    return `<button class="tab ${k===cfg.sec?'on':''}" data-act="sec" data-v="${k}"><span class="ic">${s.icon}</span><span><b>${s.name}</b><small>${s.texts.length} textes · ${n} ${s.unit}</small></span></button>`;
+  }).join('');
+  const modes=Object.entries(MODES).map(([k,md])=>{
+    const dis=k==='errors'&&!errs;
+    const pill=k==='errors'&&errs?`<span class="pill">${errs}</span>`:'';
+    return `<button class="mode ${k===cfg.mode?'on':''}" data-act="mode" data-v="${k}" ${dis?'disabled':''}>${pill}<span class="ic">${md.icon}</span><b>${md.name}</b><small>${md.desc}</small></button>`;
+  }).join('');
+  const chip=(act,v,lbl,on)=>`<button class="chip ${on?'on':''}" data-act="${act}" data-v="${v}">${lbl}</button>`;
+  let settings='';
+  if(m.kind==='text'||cfg.mode==='mix'){
+    const unit=m.kind==='text'?'textes':'questions';
+    const vals=m.kind==='text'?['5','10','20','all']:['10','20','40','all'];
+    settings+=`<div class="set"><label>Nombre de ${unit}</label><div class="chips">${vals.map(v=>chip('count',v,v==='all'?'Tout':v,cfg.count===v)).join('')}</div></div>`;
+  }
+  if(cfg.mode==='rush'){
+    settings+=`<div class="set"><label>Durée du chrono</label><div class="chips">${[60,180,300].map(v=>chip('rtime',v,(v/60)+' min',cfg.rushTime===v)).join('')}</div></div>`;
+  }
+  if(cfg.mode!=='random'){
+    settings+=`<div class="set"><label>Mélanger l’ordre des réponses<small>A/B/C/D changent de place à chaque partie</small></label><button class="toggle ${cfg.shuffleOpts?'on':''}" data-act="shuf" aria-label="Mélanger les réponses"></button></div>`;
+  }
+  const bests=store.get('eq_best',{});
+  const bl=Object.entries(MODES).filter(([k])=>k!=='errors').map(([k,md])=>{
+    if(k==='rush')return [60,180,300].map(t=>{const v=bests[cfg.sec+'_rush_'+t];return v!=null?`<span class="best">${md.icon} Rush ${t/60} min : <b>${v}</b></span>`:''}).join('');
+    const v=bests[cfg.sec+'_'+k];
+    if(v==null)return '';
+    return `<span class="best">${md.icon} ${md.name} : <b>${k==='survival'?v:v+'%'}</b></span>`;
+  }).join('');
+  $('#home').innerHTML=`
+    <div class="h2">1. Section</div><div class="tabs">${tabs}</div>
+    <div class="h2">2. Mode de jeu</div><div class="modes">${modes}</div>
+    ${settings?`<div class="h2">3. Réglages</div><div class="settings">${settings}</div>`:''}
+    <button class="btn btn-primary start" data-act="start">${m.icon} Lancer ${esc(m.name)} — ${sec.short}</button>
+    ${bl?`<div class="h2" style="text-align:center">Records · ${sec.short}</div><div class="bests">${bl}</div>`:''}`;
+  screen('home');
+}
+
+/* ---------- start ---------- */
+function permFor(it){const p=it.opts.map((_,i)=>i);return (cfg.shuffleOpts||cfg.mode==='random')?shuffle(p):p}
+
+function start(){
+  const sec=SECTIONS[cfg.sec],m=MODES[cfg.mode];
+  store.set('eq_cfg',cfg);
+  S={sec:cfg.sec,mode:cfg.mode,kind:m.kind,answers:{},perm:{},log:[],score:0,streak:0,bestStreak:0,done:false,rushTime:cfg.rushTime,qid:0};
+  if(m.kind==='text'){
+    let texts=cfg.mode==='random'?shuffle(sec.texts):sec.texts.slice();
+    if(cfg.count!=='all')texts=texts.slice(0,+cfg.count);
+    S.texts=texts;S.cur=0;S.checked=texts.map(()=>false);
+    texts.forEach(t=>t.items.forEach(it=>S.perm[it.key]=permFor(it)));
+    renderText();
+  }else{
+    let all=sec.texts.flatMap(t=>t.items);
+    if(cfg.mode==='errors'){const er=new Set(getErrors(cfg.sec));all=all.filter(i=>er.has(i.key))}
+    let pool=shuffle(all);
+    if(cfg.mode==='mix'&&cfg.count!=='all')pool=pool.slice(0,+cfg.count);
+    if(!pool.length){renderHome();return}
+    S.all=all;S.pool=pool;S.i=0;
+    if(cfg.mode==='survival')S.lives=3;
+    if(cfg.mode==='rush'){S.time=cfg.rushTime;S.timer=setInterval(tick,1000)}
+    nextFlash();
+  }
+  screen('play');
+}
+
+/* ---------- text modes (Classique / Aléatoire) ---------- */
+function textScore(){
+  let c=0,t=0;
+  S.texts.forEach((tx,i)=>{if(!S.checked[i])return;tx.items.forEach(it=>{t++;if(S.answers[it.key]===it.ans)c++})});
+  return {c,t};
+}
+function renderText(){
+  const t=S.texts[S.cur],ck=S.checked[S.cur],n=S.texts.length;
+  const done=S.checked.filter(Boolean).length,{c,t:tot}=textScore();
+  const sec=SECTIONS[S.sec];
+  const dots=S.texts.map((tx,i)=>{
+    let cls=i===S.cur?'cur':'';
+    if(S.checked[i])cls+=tx.items.every(it=>S.answers[it.key]===it.ans)?' ok':' bad';
+    return `<button class="dot ${cls}" data-act="go" data-v="${i}">${tx.num}</button>`;
+  }).join('');
+  let body='';
+  if(t.body){
+    body=esc(t.body).replace(/\n/g,'<br>');
+    t.items.forEach(it=>{
+      const a=S.answers[it.key];
+      let span;
+      if(ck){
+        span=a===it.ans?`<span class="gap ok">${esc(it.opts[a])}</span>`
+          :`<span class="gap bad">${esc(it.opts[a])}</span> <span class="gap ok">${esc(it.opts[it.ans])}</span>`;
+      }else span=a!=null?`<span class="gap filled">${esc(it.opts[a])}</span>`:`<span class="gap">${it.gid}</span>`;
+      body=body.replace('..'+it.gid+'..',span);
+    });
+    body=`<div class="body">${body}</div>`;
+  }
+  const qs=t.items.map((it,ii)=>{
+    const a=S.answers[it.key];
+    const opts=S.perm[it.key].map((oi,pos)=>{
+      let cls='opt';
+      if(ck){
+        if(oi===it.ans)cls+=a===oi?' correct':' show';
+        else if(a===oi)cls+=' wrong';else cls+=' dim';
+      }else if(a===oi)cls+=' sel';
+      return `<button class="${cls}" data-act="pick" data-v="${ii}:${oi}" ${ck?'disabled':''}><span class="lt">${LT[pos]}</span><span>${esc(it.opts[oi])}</span></button>`;
+    }).join('');
+    const ex=ck&&it.expl?`<div class="expl"><b>Explication :</b> ${esc(it.expl)}</div>`:'';
+    return `<div class="qb"><div class="qlabel">${it.label}</div>${it.prompt?`<div class="qtext">${esc(it.prompt)}</div>`:''}<div class="opts ${it.prompt?'':'grid'}">${opts}</div>${ex}</div>`;
+  }).join('');
+  const allF=t.items.every(it=>S.answers[it.key]!=null);
+  const nextUn=S.checked.findIndex((x,i)=>!x&&i!==S.cur);
+  let main;
+  if(!ck)main=`<button class="btn btn-primary" data-act="check" ${allF?'':'disabled'}>Vérifier ✓</button>`;
+  else if(S.checked.every(Boolean))main=`<button class="btn btn-primary" data-act="finish">Voir les résultats 🏆</button>`;
+  else main=`<button class="btn btn-primary" data-act="go" data-v="${S.cur<n-1&&!S.checked[S.cur+1]?S.cur+1:nextUn}">Suivant →</button>`;
+  $('#play').innerHTML=`
+    <div class="topbar">
+      <span class="tb-mode">${sec.icon} ${sec.short} · ${MODES[S.mode].name}</span>
+      <span class="tb-stat">Texte ${S.cur+1}<small>/ ${n}</small></span>
+      <span class="tb-stat">✓ ${c}<small>/ ${tot}</small></span>
+      <span class="tb-sp"></span>
+      <button class="btn btn-sec btn-sm" data-act="finish">Terminer</button>
+      <button class="btn btn-sec btn-sm" data-act="home">Accueil</button>
+      <div class="pbar"><div class="pfill" style="width:${Math.round(done/n*100)}%"></div></div>
+    </div>
+    ${n>1?`<div class="dots">${dots}</div>`:''}
+    <div class="card">
+      <div class="card-meta"><span class="num">Texte ${t.num}</span><span class="card-title">${esc(t.title)}</span></div>
+      ${body}${qs}
+    </div>
+    <div class="actions">
+      <button class="btn btn-sec" data-act="go" data-v="${S.cur-1}" ${S.cur===0?'style="visibility:hidden"':''}>← Précédent</button>
+      ${main}
+    </div>`;
+}
+function checkText(){
+  const t=S.texts[S.cur];
+  S.checked[S.cur]=true;
+  t.items.forEach(it=>{
+    const ok=S.answers[it.key]===it.ans;
+    S.log.push({it,chosen:S.answers[it.key],ok});
+    markError(it,!ok);
+  });
+  renderText();
+}
+
+/* ---------- flash modes (Mélange / Rush / Survie / Erreurs) ---------- */
+function nextFlash(){
+  if(S.done)return;
+  if(S.mode==='survival'&&S.lives<=0)return finish();
+  if(S.i>=S.pool.length){
+    if(S.mode==='rush'){S.pool=shuffle(S.all);S.i=0}
+    else return finish();
+  }
+  const it=S.pool[S.i++];
+  S.q={it,perm:permFor(it)};
+  S.answered=null;S.qid++;
+  renderFlash();
+}
+function flashTop(){
+  const sec=SECTIONS[S.sec];
+  let prog='',pct=0;
+  if(S.mode==='rush'){
+    prog=`<span class="tb-stat timer ${S.time<=10?'low':''}" id="timer">⏱ ${fmtTime(S.time)}</span>`;
+    pct=S.time/S.rushTime*100;
+  }else{
+    prog=`<span class="tb-stat">Q ${S.i}<small>/ ${S.pool.length}</small></span>`;
+    pct=(S.i-(S.answered==null?1:0))/S.pool.length*100;
+  }
+  const lives=S.mode==='survival'?`<span class="tb-stat lives">${'❤️'.repeat(S.lives)}${'🖤'.repeat(3-S.lives)}</span>`:'';
+  return `<div class="topbar">
+      <span class="tb-mode">${sec.icon} ${sec.short} · ${MODES[S.mode].name}</span>
+      ${prog}
+      <span class="tb-stat">✓ ${S.score}</span>
+      <span class="tb-stat" title="Série">🔥 ${S.streak}</span>
+      ${lives}
+      <span class="tb-sp"></span>
+      <button class="btn btn-sec btn-sm" data-act="finish">Terminer</button>
+      <div class="pbar"><div class="pfill" id="tfill" style="width:${pct}%"></div></div>
+    </div>`;
+}
+function renderSnippet(it,showAns){
+  let h=esc(it.snippet).replace(/\n/g,'<br>');
+  h=h.replace(/§(\d+)§/g,(m,g)=>{
+    if(+g!==it.gid)return '<span class="gap">…</span>';
+    if(showAns)return `<span class="gap ok">${esc(it.opts[it.ans])}</span>`;
+    return '<span class="gap hl">?</span>';
+  });
+  return `<div class="body">${h}</div>`;
+}
+function renderFlash(){
+  const {it,perm}=S.q,a=S.answered;
+  const chosen=a==null?null:perm[a];
+  const opts=perm.map((oi,pos)=>{
+    let cls='opt';
+    if(a!=null){
+      if(oi===it.ans)cls+=' correct';else if(oi===chosen)cls+=' wrong';else cls+=' dim';
+    }
+    return `<button class="${cls}" data-act="answer" data-v="${pos}" ${a!=null?'disabled':''}><span class="lt">${LT[pos]}</span><span>${esc(it.opts[oi])}</span></button>`;
+  }).join('');
+  let fb='';
+  if(a!=null){
+    const ok=chosen===it.ans;
+    fb=`<div class="fb ${ok?'ok':'bad'}">${ok?'✓ Correct !':'✗ Réponse : '+esc(it.opts[it.ans])}</div>`;
+    if(it.expl)fb+=`<div class="expl"><b>Explication :</b> ${esc(it.expl)}</div>`;
+  }
+  const last=S.mode!=='rush'&&(S.i>=S.pool.length||(S.mode==='survival'&&S.lives<=0));
+  const nextBtn=a!=null&&S.mode!=='rush'
+    ?`<div class="actions" style="justify-content:flex-end"><button class="btn btn-primary" data-act="fnext">${last?'Voir les résultats 🏆':'Suivant →'}</button></div><div class="hint">Entrée pour continuer</div>`
+    :`<div class="hint">Raccourcis : touches 1–4 ou A–D</div>`;
+  $('#play').innerHTML=`${flashTop()}
+    <div class="card" id="fcard">
+      <div class="card-meta"><span class="num">Texte ${it.num} · ${it.label}</span><span class="card-title">${esc(it.title)}</span></div>
+      ${it.prompt?`<div class="qtext" style="font-size:18px">${esc(it.prompt)}</div>`:renderSnippet(it,a!=null)}
+      <div class="opts ${it.prompt?'':'grid'}">${opts}</div>
+      ${fb}
+    </div>${nextBtn}`;
+}
+function floatMsg(txt,color){
+  const d=document.createElement('div');d.className='float';d.textContent=txt;d.style.color=color;
+  document.body.appendChild(d);setTimeout(()=>d.remove(),900);
+}
+function answer(pos){
+  if(!S||S.done||S.answered!=null)return;
+  const {it,perm}=S.q,chosen=perm[pos],ok=chosen===it.ans;
+  S.answered=pos;
+  S.log.push({it,chosen,ok});
+  markError(it,!ok);
+  if(ok){S.score++;S.streak++;S.bestStreak=Math.max(S.bestStreak,S.streak);if(S.mode==='rush')floatMsg('+1','var(--correct)')}
+  else{
+    S.streak=0;
+    if(S.mode==='rush'){S.time=Math.max(0,S.time-5);floatMsg('−5 s','var(--wrong)')}
+    if(S.mode==='survival')S.lives--;
+  }
+  renderFlash();
+  if(!ok)$('#fcard').classList.add('shake');
+  if(S.mode==='rush'){
+    if(S.time<=0)return finish();
+    const tok=S.qid,cur=S;
+    setTimeout(()=>{if(S===cur&&S.qid===tok&&!S.done)nextFlash()},ok?450:1300);
+  }
+}
+function tick(){
+  if(!S||S.done)return;
+  S.time--;
+  const el=$('#timer'),f=$('#tfill');
+  if(el){el.textContent='⏱ '+fmtTime(Math.max(0,S.time));el.classList.toggle('low',S.time<=10)}
+  if(f)f.style.width=(S.time/S.rushTime*100)+'%';
+  if(S.time<=0)finish();
+}
+
+/* ---------- results ---------- */
+function finish(){
+  if(!S)return;
+  if(S.timer)clearInterval(S.timer);
+  S.done=true;
+  const log=S.log;
+  if(!log.length){renderHome();return}
+  const c=log.filter(l=>l.ok).length,t=log.length,pct=Math.round(c/t*100);
+  if(S.kind==='text'){
+    let run=0;S.bestStreak=0;
+    log.forEach(l=>{run=l.ok?run+1:0;S.bestStreak=Math.max(S.bestStreak,run)});
+  }
+  const bests=store.get('eq_best',{}),bk=bestKey();
+  let rec=false;
+  if(S.mode!=='errors'){
+    const val=(S.mode==='rush'||S.mode==='survival')?c:pct;
+    const fullRun=S.kind==='flash'||S.checked.every(Boolean);
+    if(fullRun&&(bests[bk]==null||val>bests[bk])){rec=bests[bk]!=null||val>0;bests[bk]=val;store.set('eq_best',bests)}
+  }
+  let em='🏆',msg='Excellent !';
+  if(pct<50){em='📚';msg='Continue à pratiquer !'}else if(pct<75){em='💪';msg='Pas mal !'}else if(pct<90){em='🌟';msg='Très bien !'}
+  if(S.mode==='rush'){em='⏱️';msg=c+' bonnes réponses en '+(S.rushTime/60)+' min'}
+  if(S.mode==='survival'){em=S.lives>0?'🏅':'💀';msg=S.lives>0?'Survivant !':'Game over'}
+  const sec=SECTIONS[S.sec];
+  const remaining=getErrors(S.sec).length;
+  const wrongs=log.filter(l=>!l.ok);
+  S.revAll=false;
+  $('#results').innerHTML=`<div class="card results">
+    <div class="res-emoji">${em}</div>
+    <div class="res-title">${esc(msg)}</div>
+    <div class="res-sub">${sec.name} · ${MODES[S.mode].name}</div>
+    <div class="res-score"><span class="big">${c}</span><span class="sm">/ ${t}</span></div>
+    ${rec?'<span class="record">🎉 Nouveau record !</span>':''}
+    <div class="res-grid">
+      <div class="res-stat sc"><div class="n">${c}</div><div class="l">Correctes</div></div>
+      <div class="res-stat sw"><div class="n">${t-c}</div><div class="l">Incorrectes</div></div>
+      <div class="res-stat"><div class="n">${pct}%</div><div class="l">Réussite</div></div>
+      <div class="res-stat"><div class="n">🔥 ${S.bestStreak}</div><div class="l">Meilleure série</div></div>
+    </div>
+    <div class="res-btns">
+      <button class="btn btn-primary" data-act="replay">🔄 Rejouer</button>
+      ${remaining?`<button class="btn btn-sec" data-act="errmode">🎯 Mes erreurs (${remaining})</button>`:''}
+      <button class="btn btn-sec" data-act="home">🏠 Accueil</button>
+    </div>
+    <div class="rev"><div class="rev-title">Détail des réponses</div>
+      ${wrongs.length&&wrongs.length<log.length?`<div class="rev-filter"><div class="chips"><button class="chip on" data-act="revf" data-v="bad">Erreurs (${wrongs.length})</button><button class="chip" data-act="revf" data-v="all">Tout (${log.length})</button></div></div>`:''}
+      <div id="revList"></div>
+    </div>
+  </div>`;
+  renderReview(wrongs.length?'bad':'all');
+  screen('results');
+}
+function renderReview(f){
+  const log=f==='bad'?S.log.filter(l=>!l.ok):S.log;
+  document.querySelectorAll('[data-act="revf"]').forEach(b=>b.classList.toggle('on',b.dataset.v===f));
+  $('#revList').innerHTML=log.map(({it,chosen,ok})=>{
+    const good=esc(it.opts[it.ans]);
+    const ctx=it.prompt?esc(it.prompt):esc(it.snippet).replace(/§(\d+)§/g,(m,g)=>+g===it.gid?'<b>____</b>':'…').replace(/\n/g,' ');
+    const ans=ok?`<span class="okt">${good}</span>`:`<span class="badt">${chosen!=null?esc(it.opts[chosen]):'—'}</span> → <span class="okt">${good}</span>`;
+    return `<div class="rev-item"><div class="rev-hdr">Texte ${it.num} — ${esc(it.title)}</div>
+      <div class="rev-q"><span class="rb ${ok?'rb-ok':'rb-no'}">${ok?'✓':'✗'} ${it.label}</span>${ans}<span class="p">${ctx}</span>
+      ${!ok&&it.expl?`<div class="expl">${esc(it.expl)}</div>`:''}</div></div>`;
+  }).join('');
+}
+
+/* ---------- events ---------- */
+const ACT={
+  sec:v=>{cfg.sec=v;renderHome()},
+  mode:v=>{cfg.mode=v;if(MODES[v].kind==='text'&&!['5','10','20','all'].includes(cfg.count))cfg.count='all';if(v==='mix'&&!['10','20','40','all'].includes(cfg.count))cfg.count='20';renderHome()},
+  count:v=>{cfg.count=v;renderHome()},
+  rtime:v=>{cfg.rushTime=+v;renderHome()},
+  shuf:()=>{cfg.shuffleOpts=!cfg.shuffleOpts;renderHome()},
+  start:()=>start(),
+  home:()=>renderHome(),
+  replay:()=>start(),
+  errmode:()=>{cfg.mode='errors';start()},
+  finish:()=>finish(),
+  go:v=>{const i=+v;if(i>=0&&i<S.texts.length){S.cur=i;renderText();window.scrollTo({top:0,behavior:'smooth'})}},
+  pick:v=>{const [ii,oi]=v.split(':').map(Number);if(S.checked[S.cur])return;S.answers[S.texts[S.cur].items[ii].key]=oi;renderText()},
+  check:()=>checkText(),
+  answer:v=>answer(+v),
+  fnext:()=>{nextFlash();window.scrollTo({top:0,behavior:'smooth'})},
+  revf:v=>renderReview(v)
+};
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');
+  if(!b||b.disabled)return;
+  ACT[b.dataset.act]&&ACT[b.dataset.act](b.dataset.v);
+});
+document.addEventListener('keydown',e=>{
+  if(!S||S.done||S.kind!=='flash'||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  let pos='1234'.indexOf(k);if(pos<0)pos='abcd'.indexOf(k);
+  if(pos>=0&&S.answered==null&&pos<S.q.perm.length){answer(pos);return}
+  if((k==='enter'||k===' ')&&S.answered!=null&&S.mode!=='rush'){e.preventDefault();ACT.fnext()}
+});
+
+renderHome();
+</script>
+</body>
+</html>
