@@ -1,188 +1,441 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EPITECH English Quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Tepitech English</title>
 <meta name="description" content="Révision d'anglais : Reading Comprehension et Text Completion, avec modes Classique, Aléatoire, Mélange, Rush, Survie et Mes erreurs.">
+<meta name="theme-color" content="#0B0C11">
+<script>
+try{const t=localStorage.getItem('eq_theme');document.documentElement.dataset.theme=t?JSON.parse(t):(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark')}catch(e){}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
+/* =========================================================
+   Design tokens
+   ========================================================= */
+@property --a  {syntax:'<color>';inherits:true;initial-value:#F2A65A}
+@property --a2 {syntax:'<color>';inherits:true;initial-value:#FF7A59}
+
 :root{
-  --bg:#0b0d12;--card:#151821;--card2:#1b1f2b;--border:#262a38;--hover:#1e2232;
-  --text:#e8e8ef;--dim:#8d8fa0;
-  --correct:#2ecc71;--correct-bg:rgba(46,204,113,.12);
-  --wrong:#e74c3c;--wrong-bg:rgba(231,76,60,.12);
-  --accent:#e67e22;--accent2:#f5a623;--accent-bg:rgba(230,126,34,.12);
+  --font-sans:'Geist',ui-sans-serif,system-ui,sans-serif;
+  --font-serif:'Instrument Serif',Georgia,serif;
+  --font-mono:'Geist Mono',ui-monospace,monospace;
+
+  --r-sm:8px;--r-md:12px;--r-lg:18px;--r-xl:24px;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --spring:cubic-bezier(.34,1.45,.64,1);
+
+  /* dark (default) */
+  --bg:#0B0C11;
+  --bg-elev:#13141B;
+  --surface:rgba(255,255,255,.035);
+  --surface-2:rgba(255,255,255,.06);
+  --surface-solid:#1A1B24;
+  --line:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.15);
+  --text:#EEEDF4;
+  --muted:#A3A2B5;
+  --faint:#6E6D84;
+  --ok:#4ADE9B;
+  --bad:#FF6B6B;
+  --on-a:#14100A;
+  --shadow:0 1px 0 rgba(255,255,255,.04) inset,0 24px 60px -28px rgba(0,0,0,.7);
+  --aurora:.55;
+  --grain:.06;
+  color-scheme:dark;
 }
-body[data-sec="t"]{--accent:#6c5ce7;--accent2:#a29bfe;--accent-bg:rgba(108,92,231,.14)}
+:root[data-theme="light"]{
+  --bg:#F6F3ED;
+  --bg-elev:#FFFFFF;
+  --surface:rgba(255,255,255,.72);
+  --surface-2:#EEEAE2;
+  --surface-solid:#FFFFFF;
+  --line:rgba(40,30,20,.09);
+  --line-2:rgba(40,30,20,.18);
+  --text:#1A1820;
+  --muted:#5D5A68;
+  --faint:#918E9C;
+  --ok:#14995F;
+  --bad:#DD4A4F;
+  --on-a:#FFFFFF;
+  --shadow:0 1px 2px rgba(40,30,20,.05),0 24px 50px -30px rgba(40,30,20,.3);
+  --aurora:.38;
+  --grain:.035;
+  color-scheme:light;
+}
+/* section accents: amber/coral (Reading) — iris/sky (Completion) */
+body[data-sec="r"]{--a:#F2A65A;--a2:#FF7A59}
+body[data-sec="t"]{--a:#A08FFF;--a2:#5CC8F2}
+:root[data-theme="light"] body[data-sec="r"]{--a:#D46F12;--a2:#DC4A2F}
+:root[data-theme="light"] body[data-sec="t"]{--a:#5F49E0;--a2:#1F86C2}
+body{
+  --a-soft:color-mix(in oklab,var(--a) 14%,transparent);
+  --a-line:color-mix(in oklab,var(--a) 45%,transparent);
+  --ok-soft:color-mix(in oklab,var(--ok) 13%,transparent);
+  --bad-soft:color-mix(in oklab,var(--bad) 13%,transparent);
+}
+
+/* =========================================================
+   Base
+   ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 15% 40%,var(--accent-bg),transparent 55%),radial-gradient(ellipse at 85% 10%,rgba(255,255,255,.025),transparent 50%);pointer-events:none;z-index:0;transition:background .4s}
-button{font-family:inherit;color:inherit}
-.app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:32px 16px 80px}
-.hidden{display:none!important}
-
-/* header */
-.header{text-align:center;margin-bottom:28px}
-.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:12px}
-.header h1{font-family:'Playfair Display',serif;font-size:clamp(28px,6vw,42px);font-weight:700;line-height:1.15;margin-bottom:8px;background:linear-gradient(135deg,#fff 40%,var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.header p{color:var(--dim);font-size:15px;max-width:540px;margin:0 auto}
-
-/* home */
-.h2{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin:26px 0 10px}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tab{text-align:left;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;display:flex;gap:12px;align-items:center}
-.tab:hover{border-color:var(--accent)}
-.tab .ic{font-size:26px}
-.tab b{display:block;font-size:16px}
-.tab small{color:var(--dim);font-size:13px}
-.tab.on{border-color:var(--accent);background:linear-gradient(135deg,var(--accent-bg),var(--card));box-shadow:0 0 0 1px var(--accent) inset}
-.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.mode{position:relative;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;transition:all .2s;min-height:112px}
-.mode:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px)}
-.mode.on{border-color:var(--accent);background:linear-gradient(160deg,var(--accent-bg),var(--card));box-shadow:0 0 0 1px var(--accent) inset}
-.mode:disabled{opacity:.4;cursor:not-allowed}
-.mode .ic{font-size:22px;display:block;margin-bottom:6px}
-.mode b{display:block;font-size:15px;margin-bottom:2px}
-.mode small{color:var(--dim);font-size:12.5px;line-height:1.35;display:block}
-.mode .pill{position:absolute;top:10px;right:10px;font-size:11px;font-weight:700;background:var(--wrong-bg);color:var(--wrong);border:1px solid var(--wrong);padding:1px 7px;border-radius:10px}
-.settings{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:6px 16px}
-.set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap}
-.set+.set{border-top:1px solid var(--border)}
-.set label{font-size:14px;font-weight:600}
-.set label small{display:block;font-weight:400;color:var(--dim);font-size:12px}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--dim);cursor:pointer;transition:all .15s}
-.chip:hover{border-color:var(--accent);color:var(--text)}
-.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.toggle{width:46px;height:26px;border-radius:13px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
-.toggle.on{background:var(--accent)}
-.toggle.on::after{transform:translateX(20px)}
-.start{display:flex;width:100%;justify-content:center;margin-top:22px;padding:16px;font-size:17px}
-.bests{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;justify-content:center}
-.best{font-size:12.5px;color:var(--dim);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 10px}
-.best b{color:var(--accent2)}
-
-/* buttons */
-.btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:12px 22px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px var(--accent-bg)}
-.btn-primary:disabled{opacity:.35;cursor:not-allowed}
-.btn-sec{background:var(--card2);border:1px solid var(--border);color:var(--text)}
-.btn-sec:hover{border-color:var(--accent)}
-.btn-sm{padding:7px 12px;font-size:13px;border-radius:9px}
-
-/* topbar */
-.topbar{position:sticky;top:8px;z-index:5;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:rgba(21,24,33,.92);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:16px}
-.tb-mode{font-size:12px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:1px}
-.tb-stat{font-size:14px;font-weight:700;display:flex;align-items:center;gap:4px}
-.tb-stat small{color:var(--dim);font-weight:600;font-size:12px}
-.tb-sp{flex:1}
-.pbar{flex-basis:100%;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
-.pfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s ease}
-.timer{font-variant-numeric:tabular-nums;font-size:18px}
-.timer.low{color:var(--wrong);animation:pulse 1s infinite}
-.lives{letter-spacing:2px;font-size:15px}
-
-.dots{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:14px}
-.dot{min-width:32px;height:32px;padding:0 4px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--dim);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
-.dot:hover{border-color:var(--accent);color:var(--text)}
-.dot.cur{background:var(--accent);border-color:var(--accent);color:#fff}
-.dot.ok{background:var(--correct);border-color:var(--correct);color:#fff}
-.dot.bad{background:var(--wrong);border-color:var(--wrong);color:#fff}
-.dot.cur.ok,.dot.cur.bad{box-shadow:0 0 0 2px var(--text)}
-
-/* cards */
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px;margin-bottom:18px;animation:fadeUp .35s ease}
-.card-meta{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.num{background:var(--accent-bg);color:var(--accent2);font-size:12px;font-weight:700;padding:3px 10px;border-radius:7px;white-space:nowrap}
-.card-title{font-family:'Playfair Display',serif;font-size:20px;line-height:1.3}
-.body{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:18px;font-size:15.5px;line-height:1.85;margin-bottom:22px}
-.gap{display:inline-block;min-width:70px;text-align:center;padding:0 8px;border-radius:6px;background:#262a3d;border:1px dashed #4a4f6a;color:var(--dim);font-weight:600;line-height:1.6}
-.gap.filled{border-style:solid;border-color:var(--accent);color:var(--accent2);background:var(--accent-bg)}
-.gap.ok{border:1px solid var(--correct);background:var(--correct-bg);color:var(--correct)}
-.gap.bad{border:1px solid var(--wrong);background:var(--wrong-bg);color:var(--wrong);text-decoration:line-through}
-.gap.hl{border-style:solid;border-color:var(--accent);color:var(--accent2);background:var(--accent-bg);min-width:90px}
-.qb+.qb{margin-top:22px;padding-top:20px;border-top:1px solid var(--border)}
-.qlabel{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin-bottom:6px}
-.qtext{font-size:16px;font-weight:600;margin-bottom:12px}
-.opts{display:grid;gap:8px}
-.opts.grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
-.opt{display:flex;align-items:center;gap:10px;text-align:left;width:100%;background:transparent;border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14.5px;cursor:pointer;transition:all .15s}
-.opt:hover:not(:disabled){border-color:var(--accent);background:var(--hover)}
-.opt:disabled{cursor:default}
-.opt .lt{flex-shrink:0;width:26px;height:26px;border-radius:7px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--dim)}
-.opt.sel{border-color:var(--accent);background:var(--accent-bg)}
-.opt.sel .lt{background:var(--accent);border-color:var(--accent);color:#fff}
-.opt.correct{border-color:var(--correct);background:var(--correct-bg)}
-.opt.correct .lt{background:var(--correct);border-color:var(--correct);color:#fff}
-.opt.wrong{border-color:var(--wrong);background:var(--wrong-bg)}
-.opt.wrong .lt{background:var(--wrong);border-color:var(--wrong);color:#fff}
-.opt.show{border-color:var(--correct);border-style:dashed}
-.opt.dim{opacity:.45}
-.expl{margin-top:10px;font-size:13.5px;color:#c9c9d6;background:rgba(255,255,255,.03);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:9px 12px}
-.expl b{color:var(--accent2)}
-.fb{margin-top:16px;padding:12px 14px;border-radius:10px;font-weight:700;font-size:15px;animation:fadeUp .25s ease}
-.fb.ok{background:var(--correct-bg);color:var(--correct);border:1px solid var(--correct)}
-.fb.bad{background:var(--wrong-bg);color:var(--wrong);border:1px solid var(--wrong)}
-.actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.hint{text-align:center;font-size:12px;color:var(--dim);margin-top:10px}
-.float{position:fixed;left:50%;top:90px;transform:translateX(-50%);font-weight:800;font-size:22px;pointer-events:none;animation:floatUp .9s ease forwards;z-index:20}
-.shake{animation:shake .35s}
-
-/* results */
-.results{text-align:center}
-.res-emoji{font-size:54px;margin-bottom:8px}
-.res-title{font-family:'Playfair Display',serif;font-size:28px;margin-bottom:4px}
-.res-sub{color:var(--dim);font-size:14px;margin-bottom:22px}
-.res-score{display:inline-flex;align-items:baseline;gap:6px;background:var(--accent-bg);border:1px solid var(--accent);padding:12px 32px;border-radius:14px;margin-bottom:12px}
-.res-score .big{font-family:'Playfair Display',serif;font-size:46px;color:var(--accent2)}
-.res-score .sm{font-size:18px;color:var(--dim)}
-.record{display:block;width:max-content;margin:0 auto 18px;font-size:13px;font-weight:700;color:#1a1a1a;background:linear-gradient(135deg,#f9d423,#f5a623);padding:4px 12px;border-radius:20px;animation:pulse 1.2s infinite}
-.res-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:520px;margin:6px auto 24px}
-.res-stat{padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card2)}
-.res-stat .n{font-size:20px;font-weight:700}
-.res-stat .l{font-size:11px;color:var(--dim)}
-.sc .n{color:var(--correct)}.sw .n{color:var(--wrong)}
-.res-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.rev{margin-top:28px;text-align:left}
-.rev-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:12px;text-align:center}
-.rev-filter{display:flex;justify-content:center;margin-bottom:14px}
-.rev-item{background:rgba(255,255,255,.015);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px}
-.rev-hdr{font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:6px}
-.rev-q{font-size:13.5px;padding:3px 0}
-.rev-q .p{color:var(--dim);display:block;margin:2px 0}
-.rb{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:6px;white-space:nowrap}
-.rb-ok{background:var(--correct-bg);color:var(--correct);border:1px solid var(--correct)}
-.rb-no{background:var(--wrong-bg);color:var(--wrong);border:1px solid var(--wrong)}
-.okt{color:var(--correct);font-weight:700}
-.badt{color:var(--wrong);text-decoration:line-through}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-@keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-40px)}}
-@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-@media(max-width:640px){
-  .modes{grid-template-columns:1fr 1fr}
-  .tabs{grid-template-columns:1fr}
-  .card{padding:18px 14px}
-  .body{padding:14px;font-size:15px}
-  .res-grid{grid-template-columns:1fr 1fr}
-  .topbar{gap:8px 12px}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  font-family:var(--font-sans);background:var(--bg);color:var(--text);
+  min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;
+  transition:--a .8s var(--ease),--a2 .8s var(--ease),background-color .4s,color .4s;
+  overflow-x:hidden;
 }
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--a);outline-offset:2px;border-radius:10px}
+.hidden{display:none!important}
+.ic{width:1em;height:1em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic.fill{fill:currentColor}
+::selection{background:var(--a-soft)}
+
+/* backdrop: aurora + dot grid + grain */
+.backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.backdrop i{position:absolute;border-radius:50%;width:60vmax;height:60vmax;filter:blur(40px);opacity:var(--aurora);transition:opacity .4s}
+.backdrop i:nth-child(1){top:-30vmax;left:-20vmax;background:radial-gradient(circle,color-mix(in oklab,var(--a) 45%,transparent),transparent 62%);animation:drift1 24s ease-in-out infinite alternate}
+.backdrop i:nth-child(2){bottom:-36vmax;right:-24vmax;background:radial-gradient(circle,color-mix(in oklab,var(--a2) 38%,transparent),transparent 62%);animation:drift2 28s ease-in-out infinite alternate}
+.backdrop::before{content:'';position:absolute;inset:0;background-image:radial-gradient(var(--line-2) 1px,transparent 1.2px);background-size:26px 26px;-webkit-mask-image:linear-gradient(to bottom,#000 0,transparent 520px);mask-image:linear-gradient(to bottom,#000 0,transparent 520px);opacity:.55}
+.backdrop::after{content:'';position:absolute;inset:0;opacity:var(--grain);mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.app{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:16px 16px 72px}
+
+/* =========================================================
+   Nav + section switch
+   ========================================================= */
+.nav{
+  position:sticky;top:12px;z-index:30;display:flex;align-items:center;gap:10px;
+  padding:8px 8px 8px 12px;margin-bottom:28px;border-radius:18px;
+  background:color-mix(in oklab,var(--bg-elev) 72%,transparent);
+  border:1px solid var(--line);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-.01em;cursor:pointer}
+.brand em{font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:19px;color:var(--a)}
+.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--on-a);
+  background:linear-gradient(135deg,var(--a),var(--a2));box-shadow:0 6px 18px -6px var(--a)}
+.logo svg{width:18px;height:18px}
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;margin-left:auto;padding:4px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line)}
+.seg button{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;border-radius:10px;font-weight:600;font-size:14px;color:var(--muted);transition:color .35s var(--ease)}
+.seg button svg{font-size:16px}
+.seg button[aria-selected="true"]{color:var(--on-a)}
+.seg-pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:10px;background:linear-gradient(135deg,var(--a),var(--a2));box-shadow:0 8px 22px -8px var(--a);transition:transform .55s var(--spring)}
+body[data-sec="t"] .seg-pill{transform:translateX(100%)}
+.icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--muted);border:1px solid var(--line);background:var(--surface);transition:color .2s,border-color .2s,transform .2s}
+.icon-btn:hover{color:var(--text);border-color:var(--line-2)}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn svg{font-size:18px}
+.theme-btn .sun{display:none}
+:root[data-theme="light"] .theme-btn .sun{display:block}
+:root[data-theme="light"] .theme-btn .moon{display:none}
+body[data-screen="play"] .nav{display:none}
+
+/* =========================================================
+   Home
+   ========================================================= */
+.hero{display:grid;grid-template-columns:1.35fr 1fr;gap:32px;align-items:end;margin-bottom:44px}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font:500 12px var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--a);box-shadow:0 0 0 0 var(--a);animation:ping 2.4s var(--ease) infinite}
+.hero h1{font:400 clamp(46px,8vw,84px)/.95 var(--font-serif);letter-spacing:-.02em}
+.hero h1 em{font-style:italic;background:linear-gradient(100deg,var(--a),var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:.08em}
+.lede{margin-top:18px;max-width:440px;font-size:16px;color:var(--muted)}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hstat{padding:16px 14px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.hstat svg{font-size:17px;color:var(--a);margin-bottom:14px}
+.hstat b{display:block;font:500 26px/1 var(--font-mono);letter-spacing:-.03em}
+.hstat span{display:block;margin-top:6px;font-size:12px;color:var(--faint)}
+.hero.swap h1,.hero.swap .lede,.hero.swap .eyebrow,.hero.swap .hstat{animation:swapIn .7s var(--ease) both}
+.hero.swap .lede{animation-delay:.06s}
+.hero.swap .hstat:nth-child(2){animation-delay:.08s}
+.hero.swap .hstat:nth-child(3){animation-delay:.14s}
+
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+.sec-head h2{font:400 30px/1 var(--font-serif)}
+.sec-head span{font:500 12px var(--font-mono);color:var(--faint);letter-spacing:.06em;text-transform:uppercase}
+
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.mcard{
+  position:relative;overflow:hidden;isolation:isolate;text-align:left;
+  display:flex;flex-direction:column;gap:10px;min-height:178px;padding:18px;
+  border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);
+  transition:transform .4s var(--ease),border-color .3s,box-shadow .4s var(--ease),opacity .3s;
+}
+.mcard.wide{grid-column:span 2}
+.mcard::before{content:'';position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .35s;
+  background:radial-gradient(360px circle at var(--mx,50%) var(--my,0%),var(--a-soft),transparent 55%)}
+.mcard:hover:not(:disabled)::before{opacity:1}
+.mcard:hover:not(:disabled){transform:translateY(-3px);border-color:var(--line-2)}
+.mcard:active:not(:disabled){transform:translateY(-1px) scale(.99)}
+.mcard.on{border-color:var(--a-line);background:linear-gradient(155deg,var(--a-soft),var(--surface) 62%);box-shadow:0 0 0 1px var(--a-line) inset,0 22px 50px -30px var(--a)}
+.mcard:disabled{opacity:.38;cursor:not-allowed}
+.mc-top{display:flex;align-items:center;justify-content:space-between}
+.mc-ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;color:var(--a);background:var(--a-soft);border:1px solid var(--a-line);transition:transform .45s var(--spring)}
+.mcard:hover:not(:disabled) .mc-ic{transform:rotate(-8deg) scale(1.06)}
+.mc-tag{font:500 10.5px var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:4px 9px;border-radius:99px;border:1px solid var(--line)}
+.mc-title{font:400 27px/1.05 var(--font-serif);margin-top:6px}
+.mc-desc{font-size:13.5px;line-height:1.45;color:var(--muted);max-width:340px}
+.mc-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;font:500 11.5px var(--font-mono);color:var(--faint)}
+.mc-foot .rec{color:var(--a)}
+.mc-check{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line-2);color:transparent;transition:all .35s var(--spring)}
+.mc-check svg{font-size:13px;stroke-width:3}
+.mcard.on .mc-check{background:var(--a);border-color:var(--a);color:var(--on-a);transform:scale(1.08)}
+.mc-mark{position:absolute;right:-28px;bottom:-40px;width:190px;height:190px;color:var(--a);opacity:.07;z-index:-1;transition:transform .8s var(--ease),opacity .4s}
+.mc-mark .ic{width:100%;height:100%;stroke-width:1.2}
+.mcard:hover .mc-mark,.mcard.on .mc-mark{transform:rotate(-10deg) scale(1.05);opacity:.12}
+.badge-count{font:600 11px var(--font-mono);color:var(--bad);background:var(--bad-soft);border:1px solid color-mix(in oklab,var(--bad) 40%,transparent);padding:2px 8px;border-radius:99px}
+
+.launch{display:grid;grid-template-columns:1fr auto;align-items:end;gap:18px;margin-top:12px;padding:18px;border-radius:var(--r-xl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.fields{display:flex;flex-wrap:wrap;gap:16px 28px}
+.field>label{display:block;margin-bottom:8px;font:500 10.5px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.chipset{display:inline-flex;padding:3px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line)}
+.chip{padding:7px 13px;border-radius:8px;font-weight:600;font-size:13px;color:var(--muted);transition:color .2s,background .25s,box-shadow .25s}
+.chip:hover{color:var(--text)}
+.chip.on{color:var(--text);background:var(--surface-solid);box-shadow:0 1px 2px rgba(0,0,0,.2),0 0 0 1px var(--line)}
+.switch{display:inline-flex;align-items:center;gap:10px;padding:5px 12px 5px 5px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);font-weight:600;font-size:13px;color:var(--muted)}
+.switch .track{position:relative;width:38px;height:22px;border-radius:99px;background:var(--line-2);transition:background .3s}
+.switch .track::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .4s var(--spring)}
+.switch[aria-checked="true"]{color:var(--text)}
+.switch[aria-checked="true"] .track{background:linear-gradient(135deg,var(--a),var(--a2))}
+.switch[aria-checked="true"] .track::after{transform:translateX(16px)}
+
+.start{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;padding:12px 12px 12px 22px;border-radius:16px;color:var(--on-a);
+  background:linear-gradient(135deg,var(--a),var(--a2));box-shadow:0 18px 36px -16px var(--a);transition:transform .3s var(--ease),box-shadow .3s}
+.start::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%)}
+.start:hover{transform:translateY(-2px);box-shadow:0 24px 44px -16px var(--a)}
+.start:hover::after{transform:translateX(120%);transition:transform .9s var(--ease)}
+.start:active{transform:scale(.98)}
+.start-txt{text-align:left;font-weight:700;font-size:17px;line-height:1.15}
+.start-txt small{display:block;font:500 11px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;opacity:.72}
+.start-arrow{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(0,0,0,.14);font-size:20px;transition:transform .35s var(--spring)}
+.start:hover .start-arrow{transform:translateX(3px)}
+
+.foot{margin-top:40px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--faint)}
+.foot span{display:inline-flex;align-items:center;gap:6px}
+kbd{font:500 11px var(--font-mono);padding:2px 6px;border-radius:6px;border:1px solid var(--line-2);border-bottom-width:2px;background:var(--surface-2);color:var(--muted)}
+
+/* =========================================================
+   Play — HUD
+   ========================================================= */
+.hud{position:sticky;top:12px;z-index:20;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px;margin-bottom:18px;border-radius:18px;overflow:hidden;
+  background:color-mix(in oklab,var(--bg-elev) 78%,transparent);border:1px solid var(--line);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%)}
+.hud-mode{display:flex;align-items:center;gap:10px;min-width:0}
+.hud-mode .mc-ic{width:38px;height:38px;font-size:18px;border-radius:11px}
+.hud-mode small{display:block;font:500 10.5px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.hud-mode b{display:block;font-size:15px;font-weight:600;line-height:1.2}
+.hud-stats{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 11px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);font:600 13px var(--font-mono);font-variant-numeric:tabular-nums}
+.pill small{color:var(--faint);font-weight:500}
+.pill svg{font-size:15px}
+.pill.ok svg{color:var(--ok)} .pill.fire svg{color:var(--a)}
+.pill.fire.hot{border-color:var(--a-line);background:var(--a-soft)}
+.pill.bump{animation:bump .45s var(--spring)}
+.hearts{display:inline-flex;gap:3px;align-items:center;padding:0 10px}
+.hearts svg{font-size:16px;color:var(--bad)}
+.hearts .lost{color:var(--faint);opacity:.5}
+.hearts .just{animation:heartLost .7s var(--ease)}
+.ring{width:20px;height:20px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:3}
+.ring .tr{stroke:var(--line-2)}
+.ring .pr{stroke:var(--a);stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.timer.low{color:var(--bad);border-color:color-mix(in oklab,var(--bad) 40%,transparent);animation:bump 1s var(--ease) infinite}
+.timer.low .pr{stroke:var(--bad)}
+.hud-bar{position:absolute;left:0;right:0;bottom:0;height:2px}
+.hud-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 14px var(--a);transition:width .6s var(--ease)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:42px;padding:0 18px;border-radius:12px;font-weight:600;font-size:14.5px;transition:transform .25s var(--ease),background .2s,border-color .2s,box-shadow .3s,opacity .2s}
+.btn svg{font-size:17px}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn-primary{color:var(--on-a);background:linear-gradient(135deg,var(--a),var(--a2));box-shadow:0 12px 26px -14px var(--a)}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 16px 32px -14px var(--a)}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn-ghost{border:1px solid var(--line);background:var(--surface);color:var(--text)}
+.btn-ghost:hover{border-color:var(--line-2)}
+.btn-sm{height:36px;padding:0 12px;font-size:13px;border-radius:11px}
+
+/* rail of texts */
+.rail{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 12px;margin-bottom:6px;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+.rail button{flex:0 0 auto;min-width:40px;height:36px;padding:0 8px;border-radius:11px;border:1px solid var(--line);background:var(--surface);font:500 12.5px var(--font-mono);color:var(--muted);transition:all .25s var(--ease)}
+.rail button:hover{color:var(--text);border-color:var(--line-2)}
+.rail .ok{color:var(--ok);background:var(--ok-soft);border-color:color-mix(in oklab,var(--ok) 35%,transparent)}
+.rail .bad{color:var(--bad);background:var(--bad-soft);border-color:color-mix(in oklab,var(--bad) 35%,transparent)}
+.rail .cur{color:var(--on-a);background:linear-gradient(135deg,var(--a),var(--a2));border-color:transparent;box-shadow:0 8px 18px -10px var(--a)}
+
+/* =========================================================
+   Question card
+   ========================================================= */
+.qcard{position:relative;padding:30px;border-radius:var(--r-xl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.qcard.focus{max-width:760px;margin:0 auto}
+.qhead{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.qnum{font:500 11.5px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--a)}
+.qtitle{font:400 clamp(24px,3.6vw,32px)/1.12 var(--font-serif)}
+.passage{position:relative;padding:22px 24px 22px 26px;margin-bottom:28px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line);font-size:16px;line-height:1.95}
+.passage::before{content:'';position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(var(--a),var(--a2))}
+.gap{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:64px;padding:0 10px;border-radius:8px;border:1px dashed var(--line-2);background:var(--bg-elev);font-weight:600;font-size:14.5px;line-height:1.75;color:var(--faint);vertical-align:baseline;transition:all .35s var(--ease)}
+.gap .n{font:500 11px var(--font-mono)}
+.gap.filled{color:var(--text);border:1px solid var(--a-line);background:var(--a-soft);animation:pop .35s var(--spring)}
+.gap.ok{color:var(--ok);border:1px solid color-mix(in oklab,var(--ok) 50%,transparent);background:var(--ok-soft)}
+.gap.bad{color:var(--bad);border:1px solid color-mix(in oklab,var(--bad) 45%,transparent);background:var(--bad-soft);text-decoration:line-through}
+.gap.hl{min-width:96px;color:var(--a);border:1px solid var(--a);background:var(--a-soft);animation:glow 2s var(--ease) infinite}
+.qb+.qb{margin-top:26px;padding-top:26px;border-top:1px dashed var(--line)}
+.qlabel{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.qtag{flex-shrink:0;min-width:34px;height:26px;padding:0 8px;display:grid;place-items:center;border-radius:8px;font:600 11.5px var(--font-mono);color:var(--a);background:var(--a-soft);border:1px solid var(--a-line)}
+.qprompt{font-weight:600;font-size:16.5px;line-height:1.45;padding-top:1px}
+.prompt{font:400 clamp(24px,3.6vw,34px)/1.18 var(--font-serif);margin-bottom:24px}
+.options{display:grid;gap:8px}
+.options.grid{grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr))}
+.opt{min-width:0}.opt>span:last-child{min-width:0;overflow-wrap:anywhere}
+.opt{position:relative;display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 14px;border-radius:13px;border:1px solid var(--line);background:var(--bg-elev);font-weight:500;font-size:15px;line-height:1.35;
+  transition:transform .25s var(--ease),border-color .2s,background .25s,opacity .3s,box-shadow .3s}
+.opt:hover:not(:disabled){border-color:var(--a-line);transform:translateY(-1px);box-shadow:0 10px 24px -18px var(--a)}
+.opt:active:not(:disabled){transform:scale(.985)}
+.opt:disabled{cursor:default}
+.key{flex:0 0 28px;height:28px;display:grid;place-items:center;border-radius:8px;font:600 12px var(--font-mono);color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-bottom-width:2px;transition:all .25s var(--ease)}
+.key svg{font-size:15px;stroke-width:2.6}
+.opt.sel{border-color:var(--a);background:var(--a-soft)}
+.opt.sel .key{color:var(--on-a);background:var(--a);border-color:transparent}
+.opt.correct{border-color:var(--ok);background:var(--ok-soft);animation:pop .45s var(--spring)}
+.opt.correct .key{color:#fff;background:var(--ok);border-color:transparent}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);animation:shake .4s var(--ease)}
+.opt.wrong .key{color:#fff;background:var(--bad);border-color:transparent}
+.opt.show{border-color:color-mix(in oklab,var(--ok) 55%,transparent);border-style:dashed}
+.opt.show .key{color:var(--ok)}
+.opt.dim{opacity:.42}
+.explain{display:flex;gap:10px;margin-top:12px;padding:12px 14px;border-radius:13px;background:var(--a-soft);border:1px solid color-mix(in oklab,var(--a) 22%,transparent);font-size:14px;line-height:1.5;animation:rise .45s var(--ease) both}
+.explain svg{font-size:18px;color:var(--a);margin-top:1px}
+.verdict{display:flex;align-items:center;gap:12px;margin-top:20px;padding:12px 14px;border-radius:13px;font-weight:600;animation:rise .4s var(--ease) both}
+.verdict .vi{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:16px}
+.verdict .vi svg{stroke-width:2.8}
+.verdict.ok{color:var(--ok);background:var(--ok-soft)} .verdict.ok .vi{background:var(--ok)}
+.verdict.bad{color:var(--bad);background:var(--bad-soft)} .verdict.bad .vi{background:var(--bad)}
+.verdict span b{color:var(--text)}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px}
+.actions.center{max-width:760px;margin:18px auto 0;justify-content:flex-end}
+.hint{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:14px;font-size:12px;color:var(--faint)}
+@media (hover:none){.hint,.foot .kb{display:none}}
+
+.float{position:fixed;left:50%;top:96px;z-index:50;transform:translateX(-50%);font:700 22px var(--font-mono);pointer-events:none;animation:floatUp .9s var(--ease) forwards}
+.toast{position:fixed;left:50%;bottom:28px;z-index:50;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:99px;font-weight:600;font-size:14px;color:var(--on-a);background:linear-gradient(135deg,var(--a),var(--a2));box-shadow:0 18px 40px -14px var(--a);animation:toast 1.6s var(--ease) forwards;pointer-events:none}
+.confetti{position:fixed;z-index:60;width:8px;height:8px;border-radius:2px;pointer-events:none;animation:confetti 1.1s var(--ease) forwards}
+
+/* =========================================================
+   Results
+   ========================================================= */
+.res-hero{display:grid;grid-template-columns:auto 1fr;gap:36px;align-items:center;padding:30px;border-radius:var(--r-xl);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.score-ring{position:relative;width:184px;height:184px}
+.score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-ring circle{fill:none;stroke-width:10}
+.score-ring .tr{stroke:var(--surface-2)}
+.score-ring .pr{stroke:url(#rg);stroke-linecap:round;transition:stroke-dashoffset 1.4s var(--ease)}
+.score-ring .s1{stop-color:var(--a)} .score-ring .s2{stop-color:var(--a2)}
+.score-ring .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.score-ring b{font:500 46px/1 var(--font-mono);letter-spacing:-.04em}
+.score-ring b small{font-size:20px;color:var(--muted)}
+.score-ring .lbl{font:500 11px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:6px}
+.res-copy h2{font:400 clamp(34px,5vw,52px)/1 var(--font-serif);margin:10px 0 10px}
+.res-copy h2 em{font-style:italic;color:var(--a)}
+.res-copy p{color:var(--muted);margin-bottom:20px}
+.record{display:inline-flex;align-items:center;gap:6px;margin-left:8px;padding:3px 10px;border-radius:99px;font:600 11px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--on-a);background:linear-gradient(135deg,var(--a),var(--a2));vertical-align:middle;animation:pop .6s var(--spring) .5s both}
+.res-btns{display:flex;gap:8px;flex-wrap:wrap}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 36px}
+.tile{padding:16px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line)}
+.tile svg{font-size:17px;margin-bottom:12px;color:var(--muted)}
+.tile.ok svg{color:var(--ok)} .tile.bad svg{color:var(--bad)} .tile.fire svg{color:var(--a)}
+.tile b{display:block;font:500 28px/1 var(--font-mono);letter-spacing:-.03em}
+.tile span{display:block;margin-top:6px;font-size:12px;color:var(--faint)}
+.review-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.rev{display:grid;gap:8px}
+.rev-item{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:14px 16px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--line);animation:rise .5s var(--ease) both}
+.rev-dot{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:14px;color:#fff}
+.rev-dot svg{stroke-width:2.8}
+.rev-dot.ok{background:var(--ok)} .rev-dot.bad{background:var(--bad)}
+.rev-meta{font:500 11px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.rev-q{font-size:14px;color:var(--muted);margin-bottom:6px}
+.rev-q b{color:var(--a)}
+.rev-a{font-size:14.5px;font-weight:600;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.okt{color:var(--ok)} .badt{color:var(--bad);text-decoration:line-through;font-weight:500}
+.rev-a svg{color:var(--faint);font-size:14px}
+.rev-item .explain{margin-top:10px;animation:none}
+
+/* =========================================================
+   Motion
+   ========================================================= */
+.enter .rise{animation:rise .7s var(--ease) both;animation-delay:calc(var(--i,0) * 55ms)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes swapIn{from{opacity:0;transform:translateY(10px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes pop{0%{transform:scale(.96)}60%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-6px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+@keyframes bump{0%,100%{transform:scale(1)}40%{transform:scale(1.1)}}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--a) 60%,transparent)}80%,100%{box-shadow:0 0 0 10px transparent}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 var(--a-soft)}50%{box-shadow:0 0 0 6px var(--a-soft)}}
+@keyframes heartLost{0%{transform:scale(1.4);color:var(--bad);opacity:1}100%{transform:scale(1)}}
+@keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-44px)}}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,16px) scale(.95)}15%,80%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-8px)}}
+@keyframes confetti{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+@keyframes drift1{to{transform:translate(12vmax,8vmax) scale(1.1)}}
+@keyframes drift2{to{transform:translate(-10vmax,-6vmax) scale(1.08)}}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:26px;margin-bottom:36px}
+  .bento{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:700px){
+  .launch{grid-template-columns:1fr}
+  .start{width:100%;justify-content:space-between}
+  .res-hero{grid-template-columns:1fr;justify-items:center;text-align:center;padding:26px 18px}
+  .res-btns{justify-content:center}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .qcard{padding:20px 16px}
+  .passage{padding:16px 16px 16px 20px;font-size:15.5px}
+  .hud-stats{margin-left:0;width:100%;order:3}
+  .hud .finish-btn{margin-left:auto}
+}
+@media (max-width:560px){
+  .brand-name{display:none}
+  .seg button{padding:8px 12px;font-size:13px}
+  .mcard{min-height:160px;padding:15px}
+  .mc-title{font-size:23px}
+  .mc-desc{font-size:12.5px}
+  .hstat{padding:13px 11px}
+  .hstat b{font-size:21px}
+  .hero-stats{gap:8px}
+  .options.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:380px){
+  .bento{grid-template-columns:1fr}
+  .mcard.wide{grid-column:auto}
+  .mcard{min-height:0}
+}
+@media (max-width:330px){.options.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
 </style>
 </head>
-<body data-sec="r">
+<body data-sec="r" data-screen="home">
+<div class="backdrop" aria-hidden="true"><i></i><i></i></div>
 <div class="app">
-  <div class="header">
-    <div class="badge">EPITECH English</div>
-    <h1>English Revision Quiz</h1>
-    <p>Reading Comprehension et Text Completion, avec un mode de jeu pour chaque façon de réviser.</p>
-  </div>
+  <header class="nav">
+    <div class="brand" data-act="home" role="link" tabindex="0">
+      <span class="logo"><svg class="ic"><use href="#i-logo"/></svg></span>
+      <span class="brand-name">Tepitech <em>English</em></span>
+    </div>
+    <div class="seg" role="tablist" aria-label="Section">
+      <span class="seg-pill" aria-hidden="true"></span>
+      <button role="tab" data-act="sec" data-v="r" aria-selected="true"><svg class="ic"><use href="#i-book"/></svg>Reading</button>
+      <button role="tab" data-act="sec" data-v="t" aria-selected="false"><svg class="ic"><use href="#i-pen"/></svg>Completion</button>
+    </div>
+    <button class="icon-btn theme-btn" data-act="theme" aria-label="Changer de thème">
+      <svg class="ic moon"><use href="#i-moon"/></svg><svg class="ic sun"><use href="#i-sun"/></svg>
+    </button>
+  </header>
   <main id="home"></main>
   <main id="play" class="hidden"></main>
   <main id="results" class="hidden"></main>
@@ -191,16 +444,51 @@ button{font-family:inherit;color:inherit}
 const RAW_R=[{"id":1,"title":"Blixen Memorial Theater — Fundraising Event","questions":[{"q":"Why did Ms. Kessler write this letter?","opts":["To advertise a new show","To invite the reader to an event","To explain a new ticketing policy","To announce a fund-raising event"],"ans":3},{"q":"What prize is being offered?","opts":["Front-row seats to four performances","Meetings with performers after the shows","A year's worth of theater tickets","A check of $3,000"],"ans":2},{"q":"The word \"present\" in paragraph 2 is closest in meaning to:","opts":["On hold","In attendance","Current","Performing"],"ans":1}]},{"id":2,"title":"Classy Shopping Bags — Ipanerra Supermarkets","questions":[{"q":"What method of reducing the use of plastic bags is NOT mentioned?","opts":["Publicizing the harmful effects of using plastic bags","Providing customers with other kinds of bags","Offering a discount for not using plastic bags","Introducing extra charges for plastic bags"],"ans":0},{"q":"What did Ipanerra stop printing on its bags?","opts":["Drawings of buildings","Cartoon figures","Pictures of animals","Company logos"],"ans":3},{"q":"The word \"harmful\" line 2, is closest in meaning to:","opts":["Endangered","Prompted","Damaging","Reusable"],"ans":2}]},{"id":3,"title":"Theater Digest — Subscription Renewal","questions":[{"q":"What is the purpose of this letter?","opts":["To advertise a new publication","To correct a billing error","To request a donation","To encourage subscription renewal"],"ans":3},{"q":"What is mentioned about the website?","opts":["It contains information about competitions for readers","It can be used for online payments","It provides access to other theater-related websites","It offers additional information on stories printed in Theater Digest"],"ans":0},{"q":"The word \"invoice\" here, in the second paragraph, is closest in meaning to:","opts":["Shipment","Bill","Turnover","Estimate"],"ans":1}]},{"id":4,"title":"Saving Time When Computing","questions":[{"q":"How often are these computer articles published?","opts":["Every week","Once a month","Twice a year","Every day"],"ans":1},{"q":"What is the topic of the next article?","opts":["Security","Making your battery last longer","Buying a new computer","Computer accessories"],"ans":1},{"q":"The word \"installment\" here, line 1 of the text, is closest in meaning to:","opts":["Device","Episode","Number","Moving"],"ans":1}]},{"id":5,"title":"Toppo Travel — Anniversary Celebration","questions":[{"q":"To what event has Mr. Adams been invited?","opts":["A retirement dinner","An awards ceremony","An anniversary celebration","A hotel's grand opening"],"ans":2},{"q":"What will the event feature?","opts":["Exotic food","A slide show","A noted speaker","Ballroom dancing"],"ans":0},{"q":"The word \"fare\" here, in the second paragraph, is closest in meaning to:","opts":["Ceremony","Food","Event","Price"],"ans":3}]},{"id":6,"title":"Selvac Appliances — Complaint Letter","questions":[{"q":"What is the purpose of the letter?","opts":["To inquire about a discount","To place an order","To make a complaint","To request repair service"],"ans":2},{"q":"What is enclosed with the letter?","opts":["A copy of the warranty","A proof of purchase","A product order form","A return envelope"],"ans":1},{"q":"The word \"appliance\" (title of the letter's recipient) is closest in meaning to:","opts":["Cleaner","Application","Service","Device"],"ans":3}]},{"id":7,"title":"Mid-City Savings Bank — Service Charge","questions":[{"q":"What must customers do to avoid a service charge?","opts":["Maintain the account for at least five years","Keep a minimum sum of money on their account","Make withdrawals of less than $1000","Have more than one account at the bank"],"ans":1},{"q":"What action did Mark Aubrey take?","opts":["He closed an account","He asked a supervisor for assistance","He requested a meeting","He canceled a charge"],"ans":3},{"q":"The word \"waive\" first line of the second paragraph, is here closest in meaning to:","opts":["Increase","Stop","Rise","Cancel"],"ans":3}]},{"id":8,"title":"Alder Park — New City Recycling Program","questions":[{"q":"What is announced in the schedule?","opts":["A revised schedule for garbage collection","Fees for residential garbage pickup","The opening of recycling center","Rules for recycling household items"],"ans":3},{"q":"How many times per month will papers be collected?","opts":["1","2","4","3"],"ans":1},{"q":"Which word is NOT a synonym for \"garbage\" (end of first paragraph)?","opts":["Refuse","Rubbish","Bin liner","Waste"],"ans":0}]},{"id":9,"title":"Anita & Nancy — Budget Negotiation","questions":[{"q":"What are Anita and Nancy trying to do?","opts":["Gain extra funding for a project","Make dinner plans","Meet influential people","Stop Bob Jones from attending a meeting"],"ans":2},{"q":"How much does Nancy want the budget raised?","opts":["Half as much as Anita","An unspecified amount","By a third","By $50,000"],"ans":2},{"q":"The word \"waste\" here, line 4 of the second e-mail, is closest in meaning to:","opts":["Lack","Garbage","Squandering","Understanding"],"ans":0}]},{"id":10,"title":"Ramonville Times — Drama Committee","questions":[{"q":"What is the purpose of this article?","opts":["To advertise auditions","To publicize a theatre event","To recruit committee members","To announce an awards contest"],"ans":2},{"q":"How can people obtain more information about RDC?","opts":["By attending an August meeting","By visiting the mayor's office","By e-mailing the Ramonvilles Times","By calling the person in charge of the committee"],"ans":3},{"q":"The word \"rehearsal\" (second paragraph) is closest in meaning to:","opts":["Practice session","Performance","Audition","Event"],"ans":0}]},{"id":11,"title":"Buford Valley Daily News — Cezanta Airline Strategy","questions":[{"q":"What does Mr. Daly suggest?","opts":["Passengers opinions influence aircraft design","Cezanta's revenues will increase right away","Other airlines will try to match Cezanta's prices","Smaller airlines will be bought by their larger competitors"],"ans":2},{"q":"What can be inferred about Buford Valley?","opts":["Cezanta will cut the price in December","It is the site of a new airport","Cezanta will not fly there next year","Cezanta will move its headquarters there"],"ans":0},{"q":"The word \"offset\" (5 lines from the end of the text) is closest in meaning to:","opts":["Counterpart","Terminate","Outweigh","Stop"],"ans":3}]},{"id":12,"title":"Marshall and Young — Personnel News","questions":[{"q":"How many people from Product Design were promoted?","opts":["None","One","Three","Two"],"ans":1},{"q":"Who will be leading the Consumer Products department along with Eugene?","opts":["Constance Hayes","Gary Shepherd","The Senior VP","Jordan Jones"],"ans":0},{"q":"The word \"appointment\", first line of the text, is here closest in meaning to:","opts":["Lay-off","Date","Nomination","Meeting"],"ans":2}]},{"id":13,"title":"Lasell Inc. — Product Replacement","questions":[{"q":"What is the purpose of this letter?","opts":["To introduce a policy change","To announce a replacement plan","To respond to a customer complaint","To invite customers to an in-store event"],"ans":1},{"q":"What should the reader do?","opts":["Pick up a gift in the office","Call to schedule a pickup","Submit a copy of the receipt","Report problems immediately"],"ans":1},{"q":"The word \"commendation\" at the beginning of the text, is closest in meaning to:","opts":["Enforcement","Praise","Rule","Advice"],"ans":3}]},{"id":14,"title":"Andrew Mathers — Arrival in Tokyo","questions":[{"q":"Where will Andrew Mathers most likely be on Tuesday morning?","opts":["Tokyo","New York","Seoul","San Francisco"],"ans":2},{"q":"Due to which of the following reasons is Andrew Mathers changing his plans?","opts":["He thinks Alice Lang can do a better job","He decided to take a last minute vacation","He didn't want to meet Mr. Bayer","He has to attend an emergency meeting"],"ans":3},{"q":"The word \"leg\", end of paragraph 2, is closest in meaning to:","opts":["Trip","Plane","Step","Time"],"ans":0}]},{"id":15,"title":"Alberta Bank — New ATM Card","questions":[{"q":"What was enclosed with this letter?","opts":["A Personal Identification Number","A new Bank Card","An expiration notice","A bank statement"],"ans":1},{"q":"If this card is a replacement for a lost card, what must the customer do?","opts":["Begin using the card as usual","Pick up a new card","Call Alberta Bank","Visit an Alberta Bank branch"],"ans":2},{"q":"The word \"ATM\" (first line of first paragraph) is closest in meaning to:","opts":["Bank teller","Cash dispenser","Money withdrawal","Bank clerk"],"ans":1}]},{"id":16,"title":"Using City Buses — Hilda Braid","questions":[{"q":"What caused Hilda to feel embarrassed when she took the bus?","opts":["She kept dropping her coins","She lost her bus card","She got off at the wrong stop","She didn't have enough coins"],"ans":0},{"q":"What has been the result of the introduction of bus cards?","opts":["Older people no longer take buses","People have complained because the card is too expensive","Older people are using the bus more frequently","Hilda Braid has dropped her card"],"ans":2},{"q":"The word \"fare\" (line 1) is closest in meaning to:","opts":["Fee","Card","Journey","Ticket"],"ans":0}]},{"id":17,"title":"Juneco — Brand Manager Position","questions":[{"q":"In which Juneco division will the successful applicant probably work?","opts":["International marketing","Accounting","Production","Human resources"],"ans":0},{"q":"What is NOT a stated job responsibility?","opts":["Working with sales representatives","Creating marketing plans","Increasing product recognition domestically","Evaluating market opportunities"],"ans":2},{"q":"The word \"foster\" in paragraph 2 is closest in meaning to:","opts":["Substitute","Measure","Cherish","Encourage"],"ans":3}]},{"id":18,"title":"Food & Beverage Services — Food Hygiene Memo","questions":[{"q":"Why was this memo sent?","opts":["Because customers have been praising the food","Because there have been several complaints from customers","Because Food & Beverage Services sends a memo every month","Because the kitchen will soon be closed for renovations"],"ans":1},{"q":"Who might be at fault in this situation?","opts":["All the kitchen staff","Someone who works on Thursdays and Fridays","The chef","A waiter"],"ans":1},{"q":"The word \"narrow down\" here, end of the second paragraph, is closest in meaning to:","opts":["Cut","Limit","Top","Start"],"ans":0}]},{"id":19,"title":"Travel Memo — Alistair Black's Italy Trip","questions":[{"q":"To whom will Alistair Black be making presentations?","opts":["Maria Modesta","Employees at two factories","Paolo Svegli and the chief Engineers","The Board of Directors and the Export Division"],"ans":2},{"q":"How long will Mr Black spend sightseeing?","opts":["No time during this trip","Several hours","3 days and 2 nights","One full day"],"ans":1},{"q":"The word \"sightseeing\" here, in the last paragraph, is closest in meaning to:","opts":["Breathing","Shopping","Travel","Tourism"],"ans":1}]},{"id":20,"title":"Conference of Newspaper Reporters — Evaluation","questions":[{"q":"What seminar did the evaluator find least helpful?","opts":["Developing story ideas","Legal issues in journalism","Communicating with politicians","Winning news photos"],"ans":0},{"q":"What most likely is Mark Stephen's occupation?","opts":["Politician","History teacher","Hotel manager","Photographer"],"ans":3},{"q":"The word \"attending\" (line 1 of paragraph 1) is closest in meaning to:","opts":["Booking","Enrolling","Enjoying","Participating"],"ans":3}]},{"id":21,"title":"Ms. Jacobsen & Ms. Evans — Car Insurance Email","questions":[{"q":"What does Ms. Jacobsen ask Ms. Evans to do?","opts":["File information about a customer","Contact a customer about a new policy","Compose an e-mail message to a customer","Provide a customer with a price quote"],"ans":2},{"q":"What information about the car is NOT given?","opts":["Its color","Its purchase date","Its price","Its licence plate number"],"ans":2},{"q":"The word \"comprehensive\" (line 5 of second paragraph) is closest in meaning to:","opts":["Complete","Expensive","Understandable","Affordable"],"ans":0}]},{"id":22,"title":"Justin & Vera — Phone Message","questions":[{"q":"What was Justin doing when Vera called?","opts":["Talking on another line","Attending a meeting","Resting at home","Having lunch"],"ans":3},{"q":"Why didn't Vera send the files earlier?","opts":["She didn't want to","She was away on a business trip","She forgot about them","She has been busy"],"ans":3},{"q":"The word \"courier\" here, line 2, is closest in meaning to:","opts":["Delivery service","E-mail","Fax","Post-mail"],"ans":1}]},{"id":23,"title":"Josh — Hospital Restaurant Application","questions":[{"q":"What does Josh suggest in the message?","opts":["More time to obtain a recommendation letter","Permission to miss the orientation and training","Special consideration for his late application","A specific shift in the hospital restaurant"],"ans":2},{"q":"What did Josh do during the last two weeks?","opts":["He was on holiday","He worked to his restaurant","He helped at the community newspaper","He attended an orientation session"],"ans":0},{"q":"In paragraph 3, the word \"Limited\" is closest in meaning to:","opts":["Shared","Restricted","Adequate","Unavailable"],"ans":1}]},{"id":24,"title":"Vacation Request Memo","questions":[{"q":"Who will be receiving vacation requests?","opts":["Temporary employees","All employees","The office manager","The personnel secretary"],"ans":2},{"q":"According to the memo, what problem often occurs?","opts":["Employees do not schedule enough vacation time","Departmental managers often rejects requests for time off","Vacation time is used too early in the year","There is difficulty scheduling vacations at year's end"],"ans":3},{"q":"The word \"promptly\" (first line of the large paragraph) is closest in meaning to:","opts":["Always","Swiftly","Often","Thoroughly"],"ans":1}]},{"id":25,"title":"Darnley's Dairy — Delivery Service","questions":[{"q":"What is the purpose of this form?","opts":["To reduce delivery times","To catch customers who haven't paid their bills","To thank customers","To improve the delivery service"],"ans":3},{"q":"How much does Darnley's charge for home delivery?","opts":["It depends on the item","$1 per item","Nothing","It doesn't say"],"ans":2},{"q":"The word \"dairy\" (title) is closest in meaning to:","opts":["Notebook","Farm","Creamery","Cow"],"ans":2}]},{"id":26,"title":"Regal Hotel — Holiday Advertisement","questions":[{"q":"Based on the information in the passage, to which holiday does the advertisement refer?","opts":["Easter","Christmas","We don't know","Summer"],"ans":1},{"q":"Which of the following can be inferred from the passage about the Regal Hotel?","opts":["It's going to provide guests with a free meal","It is going to increase the family rate","It is going to close down the outdoor pools temporarily","It is going to allow the guests to cook in their room"],"ans":0},{"q":"The word \"workout\" (line 7 of paragraph 1) is closest in meaning to:","opts":["Balcony","Bodybuilding","Outdoor","Luxury"],"ans":1}]},{"id":27,"title":"Cezanta Airlines — Aircraft Modernization","questions":[{"q":"What does Cezanta plan to do?","opts":["Expand its service on less-traveled routes","Eliminate business-class and first-class seating","Reduce the number of its international flights","Modernize the inside of its aircraft"],"ans":3},{"q":"What is suggested about the airline's new policy?","opts":["Customers will be offered better fares","Ticketing fees will be eliminated","Traveling by plane will be made easier","Customers will be offered more routes"],"ans":3},{"q":"The word \"cut\" (line 3) is closest in meaning to:","opts":["Increase","Decrease","Lose","Keep"],"ans":1}]},{"id":28,"title":"Newspaper Advertising Information","questions":[{"q":"Who is this information intended for?","opts":["Editors","Lawyers","Photographers","Advertisers"],"ans":3},{"q":"What policy is stated in the information?","opts":["Payment may be made after publication","A late fee may be applied","Color advertisements are more expensive","A picture may be submitted"],"ans":3},{"q":"The word \"prices\" here is closest in meaning to:","opts":["Currency","Cash","Prizes","Fees"],"ans":2}]},{"id":29,"title":"Grant Manufacturing — Job Opportunity","questions":[{"q":"Which of the following benefits is NOT mentioned?","opts":["Health insurance","Child care","Pension","Subsidized transportation"],"ans":3},{"q":"Who should NOT apply for this job?","opts":["People interested in promotion in their job","Engineering graduates","People who previously applied for a job at Grant Manufacturing","People who like a challenging environment"],"ans":2},{"q":"The word \"quarterly\" here, line 4 of the second paragraph, is closest in meaning to:","opts":["3 times a year","4 times a month","Every 4 months","Every 3 months"],"ans":3}]},{"id":30,"title":"TDM News — Computer Magazine","questions":[{"q":"About how much does three months of storage cost for customers who subscribe by July 30?","opts":["$120","$180","$59.95","$39.95"],"ans":0},{"q":"What is NOT featured in TDM News?","opts":["Discussions about computer equipment","Job opportunities for computer technicians","Assessments of new software","Technical support questions and answers"],"ans":1},{"q":"The word \"facilities\" in the first paragraph is closest in meaning to:","opts":["Easyness","Opportunity","Equipment","Industry"],"ans":2}]},{"id":31,"title":"City Council — Tunnel Project","questions":[{"q":"What is true about the city council?","opts":["It plans to build more shops and restaurants","It has voted to approve the tunnel project","It has met with the leaders of RTS","It has been working with Yanco Builders"],"ans":3},{"q":"What did Mr. Young say about the tunnel project?","opts":["It will create more jobs in the suburbs","It will completed later than expected","It will be good for the downtown economy","It will replace the existing bridge"],"ans":2},{"q":"The word \"jams\" (second line of second column) here is closest in meaning to:","opts":["Roadworks","Accidents","Congestion","Delays"],"ans":2}]},{"id":32,"title":"Katherine Potter — Flight Reservation","questions":[{"q":"Why did Katherine Potter call?","opts":["To ask Mr Maxwell to call Mr Hill","To confirm William Maxwell's flight reservation","To inform William Maxwell that his flight is not confirmed","To make a booking"],"ans":1},{"q":"Who will be traveling?","opts":["Only Joseph Hill","William Maxwell and Joseph Hill","David Sales and William Maxwell","Joseph Hill and Katherine Potter"],"ans":1},{"q":"The expression \"return a call\" is closest in meaning to:","opts":["Call again","Reject","Call back","Not Answer"],"ans":1}]},{"id":33,"title":"Cruizin Cruises — Young Adults Cruise","questions":[{"q":"Who do Cruizin Cruises hope to attract?","opts":["Young families","People in their twenties","Elderly people","Teenagers"],"ans":1},{"q":"Who among the following would be interested in this cruise?","opts":["Someone interested in museums and art galleries","Someone who enjoys nightclubs and parties","Someone who enjoys sightseeing tours","Someone who wants a quiet getaway"],"ans":1},{"q":"The word \"parasailing\" here, line 1 of paragraph 2, is closest in meaning to:","opts":["Go shopping","Go fishing","Go parascending","Go snorkeling"],"ans":2}]},{"id":34,"title":"Ms. Young — Bank Fee Inquiry","questions":[{"q":"Why did Ms. Young write to the bank?","opts":["To transfer $500 into an account","To inquire about an unexplained deposit","To ask about a fee","To close an account"],"ans":2},{"q":"Why is Ms. Young so surprised?","opts":["That's the first time a fee is charged","She recently put $500 into her account","$30 is very expensive for a service","She's been asking an explanation for 5 years"],"ans":0},{"q":"The word \"terms\" in paragraph 1 is closest in meaning to:","opts":["Expressions","Agreements","Conditions","Periods"],"ans":2}]},{"id":35,"title":"Library Sub-Committees Memo","questions":[{"q":"What is the name of the person on top of the chart?","opts":["Allie Green","Brian Kingston","Alex Farino","City Council"],"ans":2},{"q":"What is the purpose of this memo?","opts":["To explain the library sections","To remind members of the next meeting","To remind the members of whom to contact about problems","To thank the members of the library sub-committees"],"ans":0},{"q":"The word \"chairperson\" (penultimate line of the text) is closest in meaning to:","opts":["Director","Employees","Craftsman","Secretary"],"ans":0}]},{"id":36,"title":"Water Park Opening — Newspaper Article","questions":[{"q":"What does the article imply about the opening day of the water park?","opts":["It had to be postponed by one month","It was attended by celebrities","It did not generate much interest","It was not advertized on television"],"ans":1},{"q":"What were people concerned about regarding the water park?","opts":["The building design","The cost of construction","The safety code","The choice of location"],"ans":3},{"q":"The word \"dispense\", line 7, is closest in meaning to:","opts":["Cause","Avoid","Manage","Create"],"ans":2}]},{"id":37,"title":"Cleaning Schedule — Team Members","questions":[{"q":"What area is James responsible for cleaning between 1:00 pm and 3:00 pm?","opts":["The third floor kitchens","The first floor meeting rooms","The second floor break rooms","The fourth floor hallways"],"ans":0},{"q":"Who is not authorized to approve a break?","opts":["Craig Morgan","Vincent Warren","Amy Hiam","Dean Jones"],"ans":0},{"q":"The word \"entitled\" (penultimate line of the text) is closest in meaning to:","opts":["Asked","Authorized","Hired","Payed"],"ans":1}]},{"id":38,"title":"Airport Transportation Information","questions":[{"q":"On whose website would this information most likely be found?","opts":["NACU","Regency Hotel","Airporter","Sky High Air"],"ans":3},{"q":"How long does it take to drive to downtown hotels from the airport?","opts":["15 minutes","45 minutes","30 minutes","20 minutes"],"ans":1},{"q":"The word \"serve\" in paragraph 1, line 1, is closest in meaning to:","opts":["Give out","Obey","Operate","Wait on"],"ans":2}]},{"id":40,"title":"Brian — Recording Email","questions":[{"q":"How many voices will be used in the advertisement?","opts":["Two","Five","Four","Three"],"ans":1},{"q":"Why does Brian want to finish the recording quickly?","opts":["He is impatient","He hates recording","He wants to save money","He has another appointment afterwards"],"ans":2},{"q":"The word \"charging\" here, line 4 of the body of the e-mail, is closest in meaning to:","opts":["Billing","Purchasing","Paying","Discounting"],"ans":0}]},{"id":41,"title":"Meeting Minutes — Jenny to John","questions":[{"q":"What has been the result of the Chain of Command system?","opts":["Nothing of great value","Less employees being fired","A new chair being elected for the finance committee","Better communications and fewer errors"],"ans":3},{"q":"What can be inferred from the letter?","opts":["Neither John nor Jenny attended the meeting","Jenny, but not John, attended the meeting","Both John and Jenny attended the meeting","John, but not Jenny, attended the meeting"],"ans":1},{"q":"The word \"minutes\" here, first line of first paragraph, is closest in meaning to:","opts":["Expectations","Written records","Deadlines","Times"],"ans":1}]},{"id":42,"title":"Mike O'Malley — Shipment Change","questions":[{"q":"Why did Mike O'Malley contact Scott Abernathy?","opts":["To change a shipping order","To place a furniture order","To invite him to the factory","To cancel a shipment"],"ans":0},{"q":"Who is Vincent Balasco?","opts":["A furniture store owner","A lamp shade manufacturer","A truck driver","A warehouse clerk"],"ans":0},{"q":"The word \"warehouse\", line 3 of the first paragraph, is closest in meaning to:","opts":["Depository","Shop","Factory","Office"],"ans":0}]},{"id":43,"title":"Obtaining Certified Vital Records","questions":[{"q":"What is the purpose of this notice?","opts":["To provide directions to an office","To explain how to obtain certain official records","To describe a new government facility","To announce a recent price increase"],"ans":1},{"q":"What information must accompany each request?","opts":["Two copies of recent tax returns","A letter written on business stationery","Identification that includes a photograph","The applicant's telephone number"],"ans":2},{"q":"The word \"charge\" (last line of the first part) is closest in meaning to:","opts":["Letter","Request","Fee","Time"],"ans":2}]}];
 const RAW_T=[{"title":"Online Banking Growth","text":"The number of American households doing their banking online grew by 39.2 percent last year. Experts predict that number to increase by a ..1.. 22.5 percent this year, and another 17.6 percent the year after.\n\nA total of 33.2 million American households are currently banking online. Young adults aged between 24 and 35 with household incomes of $75,000 or higher are ..2.. to do their banking online. Today, nearly ..3.. that group (48 percent) views bills online, and 46 percent pays bills online.\n\nOlder adults, those over 65, at all income levels, are the least likely to bank online.\n\nA representative for the American Association of Online Bankers says banks ..4.. their customers to bank online, \"because online banking is much cheaper for banks to provide than traditional in-person teller services.\"","gaps":[{"id":1,"opts":["superior","larger","further","more"],"ans":"further","expl":"\"A further 22.5 percent\" = un 22,5% supplementaire. \"Further\" exprime une addition/un complement."},{"id":2,"opts":["the most likely","the more likely","most likelier","more likelier"],"ans":"the most likely","expl":"Superlatif: \"the most likely\". On ne dit jamais \"likelier\" avec \"the most/more\"."},{"id":3,"opts":["half","two times","twice","double"],"ans":"half","expl":"48% ≈ la moitie (half). \"Nearly half that group\" = presque la moitie de ce groupe."},{"id":4,"opts":["have been encouraged","to encourage","are encouraging","encouragement"],"ans":"are encouraging","expl":"\"Banks are encouraging their customers\" = les banques encouragent (present progressif actif)."}]},{"title":"iTecho Auto Shop — Order #45233","text":"From: jacobw@itecho.com\nTo: yilin@automasters.biz\nDate: 4/15/2015\nRe: Order #45233\n\nDear Ms. Gao,\n\nThank you for your recent order of brake pads and replacement windshield wipers from iTecho Auto Shop. Unfortunately, we are unable to send you the merchandise because your company credit card has ..1.. . If you would still like to ..2.. this order, please let us know so that we may hold these ..3.. for you.\n\nYou can provide another credit card number, send us a check, or use any other ..4.. form of payment, and we will be happy to process your order immediately.\n\nRegards, Jacob Weisberg\nCustomer Service\niTecho Auto Shop","gaps":[{"id":1,"opts":["expiration","expired","expiring","expires"],"ans":"expired","expl":"\"has expired\" = present perfect. La carte a expire."},{"id":2,"opts":["place","check","send","remember"],"ans":"place","expl":"\"Place an order\" = passer une commande. C'est l'expression idiomatique correcte."},{"id":3,"opts":["parts","plans","qualities","reservations"],"ans":"parts","expl":"On parle de brake pads et wipers = des pieces auto. \"Hold these parts\" = garder ces pieces."},{"id":4,"opts":["capable","acceptable","proficient","acquainted"],"ans":"acceptable","expl":"\"Acceptable form of payment\" = mode de paiement acceptable/valide."}]},{"title":"Sid's Stationery — Holiday Sale","text":"Sid's Stationery\n2 Smythe St, Toronto, Canada M1B 5T6\nTel: (416) 295-1725\nDecember 1st, 20\n\nDear Ms. Michaels: Seasons Greetings.\n\nHoliday Sale\n\nAs a ..1.. customer, we wanted you to be among the first to know about our upcoming holiday sale. All craft paper, specialty printer paper, and decorative envelopes will be reduced by 50% for the month of December.\n\nAs per tradition at Sid's Stationery, we will be having a Christmas raffle. This year the grand prize is a 2-night stay for two at the Meridian Inn ..2.. Toronto Island. The winner will receive a free double occupancy stay in the penthouse suite as well as a free dinner on the moonlit patio.\n\nMoney from ticket sales will be ..3.. to The Family Foundation, a local organization that provides food and clothing to those who need it most this Christmas. We look forward ..4.. you this Christmas season.\n\nYours truly, Sid and Sandy Chester","gaps":[{"id":1,"opts":["value","valid","validate","valued"],"ans":"valued","expl":"\"Valued customer\" = client estime/apprecie. Expression tres courante en business."},{"id":2,"opts":["at","over","through","on"],"ans":"on","expl":"On utilise \"on\" avec les iles: \"on Toronto Island\"."},{"id":3,"opts":["funded","donated","purchased","collect"],"ans":"donated","expl":"\"Will be donated to\" = sera reverse/donne a. Voix passive correcte."},{"id":4,"opts":["seeing","to seeing","see","to see"],"ans":"to seeing","expl":"\"Look forward to + V-ing\" : \"look forward to seeing you\" = on a hate de vous voir."}]},{"title":"Sporting Goods Store — Holiday Prices","text":"To: elenandfamily\nFrom: salesrep234\nRe: Holiday Prices\n\nDear Customer,\n\nOur records show that you are among the top ten percent of our valuable customers for this year. As a preferred customer, you are eligible ..1.. special holiday discounts. You will receive 10% off all your online purchases made in December. This 10% can be combined with any online promotion. These are our ..2.. prices ever.\n\nWhen you log in, please identify yourself as a preferred customer by using this special login ID: XP3744. You should not share this login ID with your friends or family, but you ..3.. purchase gifts for them.\n\nWhen you use your preferred login ID, you will not only receive our best price but you will also get double bonus points that you can ..4.. future purchases. With 600 bonus points you could purchase a set of golf clubs for just $499. For 10,000 points, you can get a golf cart for $1,525.\n\nThank you for your continued business. We look forward to serving you.\n\nThe Sporting Goods Store Staff","gaps":[{"id":1,"opts":["to receive","for receiving","having received","received"],"ans":"to receive","expl":"\"Eligible to receive\" = eligible pour recevoir. \"Eligible\" + to + infinitif."},{"id":2,"opts":["lowest","low","more low","lowering"],"ans":"lowest","expl":"Superlatif de \"low\" = \"lowest\". \"Our lowest prices ever.\""},{"id":3,"opts":["had better","may","would","will"],"ans":"may","expl":"\"You may purchase\" = vous pouvez acheter (permission). \"Will\" serait trop affirmatif ici."},{"id":4,"opts":["cumulate to","apply to","recuperate to","use to"],"ans":"apply to","expl":"\"Apply points to purchases\" = appliquer des points a des achats. Expression standard."}]},{"title":"Discount Shoe Emporium — Flyer Misprint","text":"DISCOUNT SHOE EMPORIUM\nMEMORANDUM\nTO: Sales Staff\nFROM: Management B.K.\nDATE: OCTOBER 9th, 20\nSUBJECT: FLYER MISPRINT\n\nPlease be aware that there was a misprint in an advertisement for our store in this week's local free press. The ad states that on Saturday all men's formal footwear is on for 55% percent off rather ..1.. 15% off.\n\nIf customers come in and ask about this sale, please ..2.. and explain the printing error. Offer them an additional 5% off coupon ..3.. for coming into our store. The coupon can be given out even if the customer decides not to purchase any shoes.\n\nPlease call a manager to the sales floor ..4.. you encounter any customers who have the ad with them and demand to receive the 55% discount. These cases will be handled on an individual basis.\n\nThank you.\n\nB.K.","gaps":[{"id":1,"opts":["that","they're","than","then"],"ans":"than","expl":"\"Rather than\" = plutot que. Comparaison. \"They're\" = they are, ca n'a pas de sens ici."},{"id":2,"opts":["analyze","categorize","compromise","apologize"],"ans":"apologize","expl":"\"Please apologize\" = veuillez vous excuser. Face a un client mecontent, on s'excuse."},{"id":3,"opts":["to thanks them","thank them","to thank them","thanks them"],"ans":"to thank them","expl":"Infinitif de but: \"to thank them\" = pour les remercier. La structure est: coupon + to + verbe."},{"id":4,"opts":["because","before","whether","if"],"ans":"if","expl":"\"Call a manager if you encounter...\" = appelez un manager si vous rencontrez..."}]},{"title":"Customs Declaration — Airplane","text":"All passengers are required to complete the customs declaration form before entering the United States.\n\nYou should find a copy of this form inside the seat pocket in front of you; ..1.. , if there is no form please ask a member of the cabin crew for one before arrival at your final destination.\n\nPassengers who are not U.S. citizens or who are not permanent residents of the United States are required ..2.. either a white I-94 form ..3.. a green I-94W form. Passengers traveling on a visa must complete the white form.\n\nIf you do not require a visa, you must still have a valid machine-readable passport and complete the green I-94 form. All forms must be ..4.. in block capital using a black or blue pen.","gaps":[{"id":1,"opts":["however","moreover","therefore","furthermore"],"ans":"however","expl":"\"However\" = cependant. Introduit une opposition: vous devriez trouver le formulaire, cependant si non..."},{"id":2,"opts":["to fill up","filling in","to fill out","fill"],"ans":"to fill out","expl":"\"Required to fill out\" = obliges de remplir. \"Fill out a form\" est l'expression correcte pour les formulaires. \"Fill up\" est pour les reservoirs."},{"id":3,"opts":["or","and","nor","but"],"ans":"or","expl":"\"Either... or...\" = soit... soit... Structure correlative standard."},{"id":4,"opts":["completed","completing","complete","completion"],"ans":"completed","expl":"\"Must be completed\" = doivent etre remplis. Voix passive (be + participe passe)."}]},{"title":"TigerNet — Our Future","text":"To: All TigerNet employees\nFrom: John Sullivan, CEO\nDate: April 4, 2010\nSubject: Our Future\n\nThe recent collapse of our biggest competitor has many of you wondering whether the same thing could happen here. I would like to set the record straight. Today, TigerNet is positioned for ..1.. . We are the market leader with the highest quality, most functionally complete products and proven technology, ..2.. , the most experienced and dedicated workforce, and the most tried, tested, and proven management team in the industry.\n\nWhile the severe current conditions have weakened many of our competitors, indeed, dozens of internet service providers both small and large have ..3.. from the marketplace, we are increasing our market share.\n\nAs the market continues to consolidate TigerNet will actually grow. We see enormous business opportunities ahead, and expect ..4.. to thrive for at least the next several years. Our future is bright.","gaps":[{"id":1,"opts":["success","succeed","successful","successfully"],"ans":"success","expl":"\"Positioned for success\" = positionne pour le succes. Apres \"for\" on utilise un nom."},{"id":2,"opts":["the strongest balance sheet and financial viability","a strong balance sheet","strong finances","financial success"],"ans":"the strongest balance sheet and financial viability","expl":"Cette option maintient le parallelisme avec les autres superlatifs dans la phrase (highest, most...)."},{"id":3,"opts":["withdrawn","withdrew","withdrawing","withdraw"],"ans":"withdrawn","expl":"\"Have withdrawn\" = present perfect. Le participe passe de \"withdraw\" est \"withdrawn\"."},{"id":4,"opts":["the company","our company","this company","a company"],"ans":"the company","expl":"\"Expect the company to thrive\" = s'attendre a ce que la societe prospere. \"The company\" est le plus naturel dans ce contexte formel."}]},{"title":"Dogorail — Transport Exhibition","text":"Dogorail would like to invite its business associates to the 25th Dogorail Transport and Logistics Exhibition scheduled for November 9 to 11 in Prague.\n\nDogorail will be displaying its products and services on the main floor of the Zidenic Convention Center ..1.. the three-day event, and there will be a special presentation by Dogorail CEO Miroslav Sergeyev on the final night.\n\n..2..\n\nRepresentatives from Dogorail will be in attendance to assist visitors with their queries.\n\nPrivate ..3.. on any of our offerings are welcome if you wish to obtain advice about your particular requirements.\n\nTo confirm your attendance to this event, please return the enclosed form, ..4.. filled out and with your signature appended, on or before April 30.","gaps":[{"id":1,"opts":["throughout","during","while","within"],"ans":"throughout","expl":"\"Throughout the event\" = tout au long de l'evenement. Insiste sur la duree complete."},{"id":2,"opts":["Dogorail products will be unveiled to event invitees once he has finished.","New products will launch after the event.","Products are on display now.","The presentation will cover new services."],"ans":"Dogorail products will be unveiled to event invitees once he has finished.","expl":"Cette phrase fait reference a la presentation du CEO et annonce le devoilement des produits apres son discours."},{"id":3,"opts":["consultations","conversations","conferences","conclusions"],"ans":"consultations","expl":"\"Private consultations\" = consultations privees. Terme professionnel pour un conseil personnalise."},{"id":4,"opts":["fully","full","fulfill","fulfilment"],"ans":"fully","expl":"\"Fully filled out\" = entierement rempli. \"Fully\" est un adverbe qui modifie \"filled out\"."}]},{"title":"Employee Handbook — Susan Ward","text":"To: All staff\nFrom: Susan Ward\nSubject: Employee handbook\nDate: April 15\n\nThank you to everyone who participated in the discussions with company management. Your comments about some employees being unaware of the procedures for day-to-day operations have been heard. We are now working to ..1.. the situation.\n\nFor starters, we will be publishing the company's standard operating procedures as soon as possible. A printed guide will give management and staff an official reference on the performance of daily tasks.\n\n..2..\n\nHopefully, it will help move us closer to our goal of having firmly ..3.. policies.\n\nIf any revisions are required, these will be incorporated into a later version of the manual. The final version will also be ..4.. through the company's internal network. If you have any questions, please direct them to your departmental supervisors.","gaps":[{"id":1,"opts":["address","solve","manage","handle"],"ans":"address","expl":"\"Address the situation\" = traiter/aborder la situation. Tres courant en contexte professionnel."},{"id":2,"opts":["A provisional copy of this handbook will be distributed at the next meeting.","The handbook is ready for download.","We will email the handbook.","Contact HR for a copy."],"ans":"A provisional copy of this handbook will be distributed at the next meeting.","expl":"Cette phrase s'inscrit logiquement entre l'annonce de la publication et l'espoir que ca aide."},{"id":3,"opts":["establishment","established","establishing","establish"],"ans":"established","expl":"\"Firmly established policies\" = des politiques fermement etablies. On a besoin du participe passe comme adjectif."},{"id":4,"opts":["accessible","accessed","accessing","access"],"ans":"accessible","expl":"\"Be accessible\" = etre accessible. Adjectif apres \"will be\"."}]},{"title":"Peacelink — Connection Problems","text":"Most connection problems ..1.. by trying one of the following:\n\n1. Power cycle: Shut off both the modem and the computer and wait for 30 seconds. Turn the modem back on first, and then turn on the computer. After the PPPoE light stops ..2.. and stays on, you can reconnect to the internet.\n\nNOTE: If your modem does not have an on/off switch, ..3.. the modem from the electrical wall outlet to turn it off.\n\n2. Check for line interference: Make sure your modem is not on or ..4.. other electrical devices that may interfere with the signal. This includes your computer monitor, stereo speakers, cordless phone (or its base), or a halogen light.\n\n3. Call the Peacelink Telephone Support Center: You can talk to a technical support representative.","gaps":[{"id":1,"opts":["can be solved","are solving","will solve","have solved"],"ans":"can be solved","expl":"\"Can be solved\" = peuvent etre resolus. Voix passive avec modal."},{"id":2,"opts":["blinking","blinked","blinks","to blink"],"ans":"blinking","expl":"\"Stops blinking\" = arrete de clignoter. Apres \"stop\" + V-ing pour une action qui cesse."},{"id":3,"opts":["unplug","disconnect","remove","detach"],"ans":"unplug","expl":"\"Unplug the modem\" = debrancher le modem. Terme technique standard."},{"id":4,"opts":["near","next","close","beside"],"ans":"near","expl":"\"On or near other devices\" = sur ou pres d'autres appareils. \"Near\" fonctionne directement comme preposition."}]},{"title":"Professor Clarke — Christian Miller","text":"Dear Professor Clarke,\n\nI am a recent ..1.. of the University of Tayforth, where I obtained a first-class honors degree in biotechnology. As a ..2.. motivated individual, I felt that I should contact you directly rather than simply wait for a vacancy to be posted.\n\nIt is specifically for that reason that I ..3.. to you to inquire whether there are any available positions on your research team.\n\nAfter following your work and achievements closely over the past few years, I feel that I could greatly benefit from your expertise in a working laboratory environment. I hope that one day in the future I can work ..4.. you and learn many things from you.\n\nKind regards,\n\nChristian Miller","gaps":[{"id":1,"opts":["graduate","graduation","graduated","graduating"],"ans":"graduate","expl":"\"A recent graduate\" = un(e) recent(e) diplome(e). Nom apres l'article \"a\"."},{"id":2,"opts":["highly","high","higher","highest"],"ans":"highly","expl":"\"Highly motivated\" = tres motive. \"Highly\" est l'adverbe qui modifie \"motivated\"."},{"id":3,"opts":["am writing","write","wrote","have written"],"ans":"am writing","expl":"\"I am writing to you\" = je vous ecris (en ce moment). Present continu pour une action en cours."},{"id":4,"opts":["alongside","beside","among","between"],"ans":"alongside","expl":"\"Work alongside you\" = travailler a vos cotes. \"Alongside\" implique collaboration."}]}];
 
+/* ---------- icons (Lucide-style, inline sprite) ---------- */
+const ICONS={
+  logo:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="m9 9.5 2 2 4-4"/>',
+  book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+  pen:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  list:'<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
+  dice:'<rect width="18" height="18" x="3" y="3" rx="3"/><path d="M8 8h.01"/><path d="M16 8h.01"/><path d="M12 12h.01"/><path d="M8 16h.01"/><path d="M16 16h.01"/>',
+  shuffle:'<path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/>',
+  zap:'<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+  heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  arrowR:'<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  arrowL:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  flame:'<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  trophy:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  redo:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>',
+  flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  bulb:'<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  layers:'<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/>',
+  percent:'<path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+  sparkles:'<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',
+  keyboard:'<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M7 16h10"/>',
+  file:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13H8"/><path d="M16 17H8"/><path d="M16 13h-2"/>'
+};
+document.body.insertAdjacentHTML('afterbegin','<svg width="0" height="0" style="position:absolute" aria-hidden="true">'+
+  Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join('')+'</svg>');
+const ic=(n,c='')=>`<svg class="ic ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+
 /* ---------- utils ---------- */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const LT='ABCD';
+const pad=n=>String(n).padStart(2,'0');
 const store={
   get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 };
 const fmtTime=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* Extract the sentence(s) around a gap so a Text Completion item can be played on its own. */
 function snippet(text,gid){
@@ -221,10 +509,14 @@ function snippet(text,gid){
 
 /* ---------- data ---------- */
 const SECTIONS={
-  r:{name:'Reading Comprehension',short:'Reading',icon:'📖',unit:'questions',
+  r:{name:'Reading Comprehension',short:'Reading',icon:'book',unit:'questions',
+     h1:'Lis entre<br>les <em>lignes.</em>',
+     lede:'Comprends le sens, repère le détail, devine le vocabulaire. Chaque texte, trois questions.',
      texts:RAW_R.map(x=>({num:x.id,title:x.title,body:null,
        items:x.questions.map((q,j)=>({key:'r'+x.id+'_'+j,sec:'r',label:'Q'+(j+1),prompt:q.q,opts:q.opts,ans:q.ans,expl:null,title:x.title,num:x.id}))}))},
-  t:{name:'Text Completion',short:'Completion',icon:'✍️',unit:'trous',
+  t:{name:'Text Completion',short:'Completion',icon:'pen',unit:'trous',
+     h1:'Trouve le<br><em>mot juste.</em>',
+     lede:'Grammaire, collocations, connecteurs. Remplis chaque trou, chaque réponse est expliquée.',
      texts:RAW_T.map((x,i)=>({num:i+1,title:x.title,body:x.text,
        items:x.gaps.map(g=>({key:'t'+(i+1)+'_'+g.id,sec:'t',gid:g.id,label:'Trou '+g.id,prompt:null,snippet:snippet(x.text,g.id),opts:g.opts,ans:g.opts.indexOf(g.ans),expl:g.expl,title:x.title,num:i+1}))}))}
 };
@@ -232,12 +524,12 @@ const ITEMS={};
 Object.values(SECTIONS).forEach(s=>s.texts.forEach(t=>t.items.forEach(it=>ITEMS[it.key]=it)));
 
 const MODES={
-  classic:{name:'Classique',icon:'📚',kind:'text',desc:'Texte par texte, dans l’ordre.'},
-  random:{name:'Aléatoire',icon:'🎲',kind:'text',desc:'Textes tirés au hasard, réponses mélangées.'},
-  mix:{name:'Mélange',icon:'🔀',kind:'flash',desc:'Toutes les questions mélangées, correction immédiate.'},
-  rush:{name:'Rush',icon:'⏱️',kind:'flash',desc:'Max de bonnes réponses avant la fin du chrono. Erreur = −5 s.'},
-  survival:{name:'Survie',icon:'❤️',kind:'flash',desc:'3 vies. Jusqu’où tu tiens ?'},
-  errors:{name:'Mes erreurs',icon:'🎯',kind:'flash',desc:'Rejoue uniquement les questions ratées.'}
+  classic:{name:'Classique',icon:'list',tag:'Par texte',kind:'text',wide:true,desc:'Texte par texte, dans l’ordre. Le format de l’examen, pour poser les bases.'},
+  random:{name:'Aléatoire',icon:'dice',tag:'Par texte',kind:'text',desc:'Textes tirés au hasard, réponses mélangées.'},
+  mix:{name:'Mélange',icon:'shuffle',tag:'Flash',kind:'flash',desc:'Une question à la fois, correction immédiate.'},
+  rush:{name:'Rush',icon:'zap',tag:'Chrono',kind:'flash',wide:true,desc:'Un maximum de bonnes réponses avant la fin du chrono. Chaque erreur coûte 5 secondes.'},
+  survival:{name:'Survie',icon:'heart',tag:'3 vies',kind:'flash',desc:'Trois erreurs et c’est fini. Jusqu’où tu tiens ?'},
+  errors:{name:'Mes erreurs',icon:'target',tag:'Ciblé',kind:'flash',desc:'Rejoue seulement ce que tu as raté.'}
 };
 
 let cfg=Object.assign({sec:'r',mode:'classic',count:'all',shuffleOpts:true,rushTime:180},store.get('eq_cfg',{}));
@@ -252,53 +544,142 @@ function markError(it,wrong){
 }
 const bestKey=()=>S.sec+'_'+S.mode+(S.mode==='rush'?'_'+S.rushTime:'');
 
-function screen(id){['home','play','results'].forEach(x=>$('#'+x).classList.toggle('hidden',x!==id));window.scrollTo({top:0,behavior:'smooth'})}
+/* ---------- screens & effects ---------- */
+function setScreen(id){
+  ['home','play','results'].forEach(x=>$('#'+x).classList.toggle('hidden',x!==id));
+  document.body.dataset.screen=id;
+  const el=$('#'+id);
+  el.classList.remove('enter');void el.offsetWidth;el.classList.add('enter');
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function syncNav(){
+  document.body.dataset.sec=cfg.sec;
+  document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.v===cfg.sec)));
+}
+function floatMsg(txt,color){
+  const d=document.createElement('div');d.className='float';d.textContent=txt;d.style.color=color;
+  document.body.appendChild(d);setTimeout(()=>d.remove(),900);
+}
+function toast(html){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const d=document.createElement('div');d.className='toast';d.innerHTML=html;
+  document.body.appendChild(d);setTimeout(()=>d.remove(),1700);
+}
+function confetti(x,y,n=34){
+  if(reduced())return;
+  const cs=getComputedStyle(document.body),cols=[cs.getPropertyValue('--a'),cs.getPropertyValue('--a2'),cs.getPropertyValue('--ok'),'#fff'];
+  for(let i=0;i<n;i++){
+    const d=document.createElement('i');d.className='confetti';
+    const ang=Math.random()*Math.PI*2,dist=80+Math.random()*160;
+    d.style.cssText=`left:${x}px;top:${y}px;background:${cols[i%cols.length]};--dx:${Math.cos(ang)*dist}px;--dy:${Math.sin(ang)*dist+60}px;--r:${Math.random()*540}deg;animation-delay:${Math.random()*80}ms`;
+    document.body.appendChild(d);setTimeout(()=>d.remove(),1300);
+  }
+}
+function countUp(root){
+  root.querySelectorAll('[data-count]').forEach(el=>{
+    const to=+el.dataset.count,suf=el.dataset.suf||'';
+    if(reduced()){el.innerHTML=to+suf;return}
+    const t0=performance.now(),d=1100;
+    const step=t=>{const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3);el.innerHTML=Math.round(to*e)+suf;if(k<1)requestAnimationFrame(step)};
+    requestAnimationFrame(step);
+  });
+}
+function toggleTheme(btn){
+  const next=document.documentElement.dataset.theme==='light'?'dark':'light';
+  const apply=()=>{document.documentElement.dataset.theme=next;store.set('eq_theme',next);
+    document.querySelector('meta[name=theme-color]').content=next==='light'?'#F6F3ED':'#0B0C11'};
+  if(!document.startViewTransition||reduced()){apply();return}
+  const r=btn.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+  document.startViewTransition(apply).ready.then(()=>{
+    document.documentElement.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${R}px at ${x}px ${y}px)`]},
+      {duration:650,easing:'cubic-bezier(.2,.8,.2,1)',pseudoElement:'::view-transition-new(root)'});
+  });
+}
 
 /* ---------- home ---------- */
-function renderHome(){
+function homeStats(){
+  const bests=store.get('eq_best',{});
+  const pcts=['classic','random','mix'].map(m=>bests[cfg.sec+'_'+m]).filter(v=>v!=null);
+  return {bests,bestPct:pcts.length?Math.max(...pcts):null};
+}
+function recordFor(k,bests){
+  if(k==='errors')return '';
+  if(k==='rush'){
+    const v=[60,180,300].map(t=>bests[cfg.sec+'_rush_'+t]).filter(v=>v!=null);
+    return v.length?`<span class="rec">Record ${Math.max(...v)} pts</span>`:'';
+  }
+  const v=bests[cfg.sec+'_'+k];
+  if(v==null)return '';
+  return `<span class="rec">Record ${k==='survival'?v+' pts':v+'%'}</span>`;
+}
+function renderHome(anim='enter'){
   if(S&&S.timer)clearInterval(S.timer);
   S=null;
-  document.body.dataset.sec=cfg.sec;
+  syncNav();
   store.set('eq_cfg',cfg);
-  const sec=SECTIONS[cfg.sec],m=MODES[cfg.mode];
+  const sec=SECTIONS[cfg.sec];
   const errs=getErrors(cfg.sec).length;
   if(cfg.mode==='errors'&&!errs)cfg.mode='classic';
-  const tabs=Object.entries(SECTIONS).map(([k,s])=>{
-    const n=s.texts.reduce((a,t)=>a+t.items.length,0);
-    return `<button class="tab ${k===cfg.sec?'on':''}" data-act="sec" data-v="${k}"><span class="ic">${s.icon}</span><span><b>${s.name}</b><small>${s.texts.length} textes · ${n} ${s.unit}</small></span></button>`;
-  }).join('');
-  const modes=Object.entries(MODES).map(([k,md])=>{
+  const total=sec.texts.reduce((a,t)=>a+t.items.length,0);
+  const {bests,bestPct}=homeStats();
+  const cards=Object.entries(MODES).map(([k,m],i)=>{
     const dis=k==='errors'&&!errs;
-    const pill=k==='errors'&&errs?`<span class="pill">${errs}</span>`:'';
-    return `<button class="mode ${k===cfg.mode?'on':''}" data-act="mode" data-v="${k}" ${dis?'disabled':''}>${pill}<span class="ic">${md.icon}</span><b>${md.name}</b><small>${md.desc}</small></button>`;
-  }).join('');
-  const chip=(act,v,lbl,on)=>`<button class="chip ${on?'on':''}" data-act="${act}" data-v="${v}">${lbl}</button>`;
-  let settings='';
-  if(m.kind==='text'||cfg.mode==='mix'){
-    const unit=m.kind==='text'?'textes':'questions';
-    const vals=m.kind==='text'?['5','10','20','all']:['10','20','40','all'];
-    settings+=`<div class="set"><label>Nombre de ${unit}</label><div class="chips">${vals.map(v=>chip('count',v,v==='all'?'Tout':v,cfg.count===v)).join('')}</div></div>`;
-  }
-  if(cfg.mode==='rush'){
-    settings+=`<div class="set"><label>Durée du chrono</label><div class="chips">${[60,180,300].map(v=>chip('rtime',v,(v/60)+' min',cfg.rushTime===v)).join('')}</div></div>`;
-  }
-  if(cfg.mode!=='random'){
-    settings+=`<div class="set"><label>Mélanger l’ordre des réponses<small>A/B/C/D changent de place à chaque partie</small></label><button class="toggle ${cfg.shuffleOpts?'on':''}" data-act="shuf" aria-label="Mélanger les réponses"></button></div>`;
-  }
-  const bests=store.get('eq_best',{});
-  const bl=Object.entries(MODES).filter(([k])=>k!=='errors').map(([k,md])=>{
-    if(k==='rush')return [60,180,300].map(t=>{const v=bests[cfg.sec+'_rush_'+t];return v!=null?`<span class="best">${md.icon} Rush ${t/60} min : <b>${v}</b></span>`:''}).join('');
-    const v=bests[cfg.sec+'_'+k];
-    if(v==null)return '';
-    return `<span class="best">${md.icon} ${md.name} : <b>${k==='survival'?v:v+'%'}</b></span>`;
+    let foot=recordFor(k,bests)||`<span>${m.kind==='text'?sec.texts.length+' textes':total+' '+sec.unit}</span>`;
+    if(k==='errors')foot=errs?`<span class="badge-count">${errs} à revoir</span>`:'<span>Aucune erreur</span>';
+    return `<button class="mcard rise ${m.wide?'wide':''} ${k===cfg.mode?'on':''}" style="--i:${i+3}" data-act="mode" data-v="${k}" ${dis?'disabled':''} aria-pressed="${k===cfg.mode}">
+      ${m.wide?`<span class="mc-mark">${ic(k==='classic'?sec.icon:m.icon)}</span>`:''}
+      <span class="mc-top"><span class="mc-ic">${ic(m.icon)}</span><span class="mc-tag">${m.tag}</span></span>
+      <span class="mc-title">${m.name}</span>
+      <span class="mc-desc">${m.desc}</span>
+      <span class="mc-foot">${foot}<span class="mc-check">${ic('check')}</span></span>
+    </button>`;
   }).join('');
   $('#home').innerHTML=`
-    <div class="h2">1. Section</div><div class="tabs">${tabs}</div>
-    <div class="h2">2. Mode de jeu</div><div class="modes">${modes}</div>
-    ${settings?`<div class="h2">3. Réglages</div><div class="settings">${settings}</div>`:''}
-    <button class="btn btn-primary start" data-act="start">${m.icon} Lancer ${esc(m.name)} — ${sec.short}</button>
-    ${bl?`<div class="h2" style="text-align:center">Records · ${sec.short}</div><div class="bests">${bl}</div>`:''}`;
-  screen('home');
+    <section class="hero ${anim==='swap'?'swap':''}">
+      <div class="rise" style="--i:0">
+        <div class="eyebrow"><span class="pulse"></span>${sec.name}</div>
+        <h1>${sec.h1}</h1>
+        <p class="lede">${sec.lede}</p>
+      </div>
+      <div class="hero-stats rise" style="--i:1">
+        <div class="hstat">${ic('layers')}<b>${total}</b><span>${sec.unit}</span></div>
+        <div class="hstat">${ic('trophy')}<b>${bestPct!=null?bestPct+'%':'—'}</b><span>meilleur score</span></div>
+        <div class="hstat">${ic('target')}<b>${errs}</b><span>à revoir</span></div>
+      </div>
+    </section>
+    <div class="sec-head rise" style="--i:2"><h2>Choisis ton mode</h2><span>6 façons de réviser</span></div>
+    <div class="bento">${cards}</div>
+    <div class="launch rise" style="--i:9" id="launch"></div>
+    <div class="foot rise" style="--i:10">
+      <span class="kb">${ic('keyboard')} <kbd>1</kbd>–<kbd>4</kbd> ou <kbd>A</kbd>–<kbd>D</kbd> pour répondre, <kbd>Entrée</kbd> pour continuer</span>
+    </div>`;
+  renderLaunch();
+  if(anim==='enter')setScreen('home');
+  else{$('#home').classList.remove('enter');document.body.dataset.screen='home'}
+}
+function renderLaunch(){
+  const m=MODES[cfg.mode],sec=SECTIONS[cfg.sec];
+  const chip=(act,v,lbl,on)=>`<button class="chip ${on?'on':''}" data-act="${act}" data-v="${v}">${lbl}</button>`;
+  let f='';
+  if(m.kind==='text'||cfg.mode==='mix'){
+    const vals=m.kind==='text'?['5','10','20','all']:['10','20','40','all'];
+    f+=`<div class="field"><label>${m.kind==='text'?'Textes':'Questions'}</label><div class="chipset">${vals.map(v=>chip('count',v,v==='all'?'Tout':v,cfg.count===v)).join('')}</div></div>`;
+  }
+  if(cfg.mode==='rush')
+    f+=`<div class="field"><label>Chrono</label><div class="chipset">${[60,180,300].map(v=>chip('rtime',v,(v/60)+' min',cfg.rushTime===v)).join('')}</div></div>`;
+  if(cfg.mode!=='random')
+    f+=`<div class="field"><label>Réponses</label><button class="switch" role="switch" aria-checked="${cfg.shuffleOpts}" data-act="shuf"><span class="track"></span>Ordre mélangé</button></div>`;
+  $('#launch').innerHTML=`<div class="fields">${f}</div>
+    <button class="start" data-act="start"><span class="start-txt"><small>${m.name} · ${sec.short}</small>Commencer</span><span class="start-arrow">${ic('arrowR')}</span></button>`;
+}
+function selectMode(v){
+  cfg.mode=v;
+  if(MODES[v].kind==='text'&&!['5','10','20','all'].includes(cfg.count))cfg.count='all';
+  if(v==='mix'&&!['10','20','40','all'].includes(cfg.count))cfg.count='20';
+  store.set('eq_cfg',cfg);
+  document.querySelectorAll('.mcard').forEach(c=>{const on=c.dataset.v===v;c.classList.toggle('on',on);c.setAttribute('aria-pressed',on)});
+  renderLaunch();
 }
 
 /* ---------- start ---------- */
@@ -313,7 +694,7 @@ function start(){
     if(cfg.count!=='all')texts=texts.slice(0,+cfg.count);
     S.texts=texts;S.cur=0;S.checked=texts.map(()=>false);
     texts.forEach(t=>t.items.forEach(it=>S.perm[it.key]=permFor(it)));
-    renderText();
+    setScreen('play');renderText();
   }else{
     let all=sec.texts.flatMap(t=>t.items);
     if(cfg.mode==='errors'){const er=new Set(getErrors(cfg.sec));all=all.filter(i=>er.has(i.key))}
@@ -323,9 +704,25 @@ function start(){
     S.all=all;S.pool=pool;S.i=0;
     if(cfg.mode==='survival')S.lives=3;
     if(cfg.mode==='rush'){S.time=cfg.rushTime;S.timer=setInterval(tick,1000)}
-    nextFlash();
+    setScreen('play');nextFlash();
   }
-  screen('play');
+}
+
+/* ---------- HUD ---------- */
+function hud(statsHtml,pct){
+  const sec=SECTIONS[S.sec],m=MODES[S.mode];
+  return `<div class="hud">
+    <button class="icon-btn" data-act="home" aria-label="Accueil">${ic('home')}</button>
+    <div class="hud-mode"><span class="mc-ic">${ic(m.icon)}</span><div><small>${sec.short}</small><b>${m.name}</b></div></div>
+    <div class="hud-stats">${statsHtml}</div>
+    <button class="btn btn-ghost btn-sm finish-btn" data-act="finish">${ic('flag')}Terminer</button>
+    <div class="hud-bar"><i id="hbar" style="width:${pct}%"></i></div>
+  </div>`;
+}
+const C20=2*Math.PI*8;
+function timerPill(){
+  const off=C20*(1-S.time/S.rushTime);
+  return `<span class="pill timer ${S.time<=10?'low':''}" id="timer"><svg class="ring" viewBox="0 0 20 20"><circle class="tr" cx="10" cy="10" r="8"/><circle class="pr" id="tring" cx="10" cy="10" r="8" stroke-dasharray="${C20}" stroke-dashoffset="${off}"/></svg><span id="ttext">${fmtTime(S.time)}</span></span>`;
 }
 
 /* ---------- text modes (Classique / Aléatoire) ---------- */
@@ -334,14 +731,13 @@ function textScore(){
   S.texts.forEach((tx,i)=>{if(!S.checked[i])return;tx.items.forEach(it=>{t++;if(S.answers[it.key]===it.ans)c++})});
   return {c,t};
 }
-function renderText(){
+function renderText(bumpScore){
   const t=S.texts[S.cur],ck=S.checked[S.cur],n=S.texts.length;
   const done=S.checked.filter(Boolean).length,{c,t:tot}=textScore();
-  const sec=SECTIONS[S.sec];
-  const dots=S.texts.map((tx,i)=>{
+  const rail=S.texts.map((tx,i)=>{
     let cls=i===S.cur?'cur':'';
-    if(S.checked[i])cls+=tx.items.every(it=>S.answers[it.key]===it.ans)?' ok':' bad';
-    return `<button class="dot ${cls}" data-act="go" data-v="${i}">${tx.num}</button>`;
+    if(S.checked[i]&&i!==S.cur)cls=tx.items.every(it=>S.answers[it.key]===it.ans)?'ok':'bad';
+    return `<button class="${cls}" data-act="go" data-v="${i}" aria-label="Texte ${tx.num}">${pad(tx.num)}</button>`;
   }).join('');
   let body='';
   if(t.body){
@@ -352,59 +748,56 @@ function renderText(){
       if(ck){
         span=a===it.ans?`<span class="gap ok">${esc(it.opts[a])}</span>`
           :`<span class="gap bad">${esc(it.opts[a])}</span> <span class="gap ok">${esc(it.opts[it.ans])}</span>`;
-      }else span=a!=null?`<span class="gap filled">${esc(it.opts[a])}</span>`:`<span class="gap">${it.gid}</span>`;
+      }else span=a!=null?`<span class="gap filled">${esc(it.opts[a])}</span>`:`<span class="gap"><span class="n">${it.gid}</span></span>`;
       body=body.replace('..'+it.gid+'..',span);
     });
-    body=`<div class="body">${body}</div>`;
+    body=`<div class="passage">${body}</div>`;
   }
   const qs=t.items.map((it,ii)=>{
     const a=S.answers[it.key];
     const opts=S.perm[it.key].map((oi,pos)=>{
-      let cls='opt';
+      let cls='opt',key=LT[pos];
       if(ck){
-        if(oi===it.ans)cls+=a===oi?' correct':' show';
-        else if(a===oi)cls+=' wrong';else cls+=' dim';
+        if(oi===it.ans){cls+=a===oi?' correct':' show';key=ic('check')}
+        else if(a===oi){cls+=' wrong';key=ic('x')}else cls+=' dim';
       }else if(a===oi)cls+=' sel';
-      return `<button class="${cls}" data-act="pick" data-v="${ii}:${oi}" ${ck?'disabled':''}><span class="lt">${LT[pos]}</span><span>${esc(it.opts[oi])}</span></button>`;
+      return `<button class="${cls}" data-act="pick" data-v="${ii}:${oi}" ${ck?'disabled':''}><span class="key">${key}</span><span>${esc(it.opts[oi])}</span></button>`;
     }).join('');
-    const ex=ck&&it.expl?`<div class="expl"><b>Explication :</b> ${esc(it.expl)}</div>`:'';
-    return `<div class="qb"><div class="qlabel">${it.label}</div>${it.prompt?`<div class="qtext">${esc(it.prompt)}</div>`:''}<div class="opts ${it.prompt?'':'grid'}">${opts}</div>${ex}</div>`;
+    const ex=ck&&it.expl?`<div class="explain">${ic('bulb')}<div>${esc(it.expl)}</div></div>`:'';
+    return `<div class="qb"><div class="qlabel"><span class="qtag">${it.prompt?it.label:it.gid}</span>${it.prompt?`<span class="qprompt">${esc(it.prompt)}</span>`:`<span class="qprompt" style="color:var(--muted);font-weight:500">Choisis le mot du trou ${it.gid}</span>`}</div><div class="options ${it.prompt?'':'grid'}">${opts}</div>${ex}</div>`;
   }).join('');
   const allF=t.items.every(it=>S.answers[it.key]!=null);
   const nextUn=S.checked.findIndex((x,i)=>!x&&i!==S.cur);
   let main;
-  if(!ck)main=`<button class="btn btn-primary" data-act="check" ${allF?'':'disabled'}>Vérifier ✓</button>`;
-  else if(S.checked.every(Boolean))main=`<button class="btn btn-primary" data-act="finish">Voir les résultats 🏆</button>`;
-  else main=`<button class="btn btn-primary" data-act="go" data-v="${S.cur<n-1&&!S.checked[S.cur+1]?S.cur+1:nextUn}">Suivant →</button>`;
-  $('#play').innerHTML=`
-    <div class="topbar">
-      <span class="tb-mode">${sec.icon} ${sec.short} · ${MODES[S.mode].name}</span>
-      <span class="tb-stat">Texte ${S.cur+1}<small>/ ${n}</small></span>
-      <span class="tb-stat">✓ ${c}<small>/ ${tot}</small></span>
-      <span class="tb-sp"></span>
-      <button class="btn btn-sec btn-sm" data-act="finish">Terminer</button>
-      <button class="btn btn-sec btn-sm" data-act="home">Accueil</button>
-      <div class="pbar"><div class="pfill" style="width:${Math.round(done/n*100)}%"></div></div>
-    </div>
-    ${n>1?`<div class="dots">${dots}</div>`:''}
-    <div class="card">
-      <div class="card-meta"><span class="num">Texte ${t.num}</span><span class="card-title">${esc(t.title)}</span></div>
+  if(!ck)main=`<button class="btn btn-primary" data-act="check" ${allF?'':'disabled'}>${ic('check')}Vérifier</button>`;
+  else if(S.checked.every(Boolean))main=`<button class="btn btn-primary" data-act="finish">${ic('trophy')}Voir les résultats</button>`;
+  else main=`<button class="btn btn-primary" data-act="go" data-v="${S.cur<n-1&&!S.checked[S.cur+1]?S.cur+1:nextUn}">Suivant${ic('arrowR')}</button>`;
+  const stats=`<span class="pill">${ic('file')}${pad(S.cur+1)}<small>/${pad(n)}</small></span><span class="pill ok ${bumpScore?'bump':''}">${ic('check')}${c}<small>/${tot}</small></span>`;
+  $('#play').innerHTML=`${hud(stats,Math.round(done/n*100))}
+    ${n>1?`<nav class="rail" aria-label="Textes">${rail}</nav>`:''}
+    <article class="qcard rise" style="--i:1">
+      <div class="qhead"><span class="qnum">Texte ${pad(t.num)} · ${t.items.length} ${t.body?'trous':'questions'}</span><h2 class="qtitle">${esc(t.title)}</h2></div>
       ${body}${qs}
-    </div>
+    </article>
     <div class="actions">
-      <button class="btn btn-sec" data-act="go" data-v="${S.cur-1}" ${S.cur===0?'style="visibility:hidden"':''}>← Précédent</button>
+      <button class="btn btn-ghost" data-act="go" data-v="${S.cur-1}" ${S.cur===0?'style="visibility:hidden"':''}>${ic('arrowL')}Précédent</button>
       ${main}
     </div>`;
+  const cur=$('.rail .cur');
+  if(cur)cur.parentNode.scrollTo({left:cur.offsetLeft-cur.parentNode.clientWidth/2+cur.clientWidth/2,behavior:'smooth'});
 }
 function checkText(){
   const t=S.texts[S.cur];
   S.checked[S.cur]=true;
+  let allOk=true;
   t.items.forEach(it=>{
     const ok=S.answers[it.key]===it.ans;
+    if(!ok)allOk=false;
     S.log.push({it,chosen:S.answers[it.key],ok});
     markError(it,!ok);
   });
-  renderText();
+  renderText(true);
+  if(allOk){toast(ic('sparkles')+' Sans faute !');const b=$('.actions .btn-primary').getBoundingClientRect();confetti(b.left+b.width/2,b.top,22)}
 }
 
 /* ---------- flash modes (Mélange / Rush / Survie / Erreurs) ---------- */
@@ -417,30 +810,8 @@ function nextFlash(){
   }
   const it=S.pool[S.i++];
   S.q={it,perm:permFor(it)};
-  S.answered=null;S.qid++;
-  renderFlash();
-}
-function flashTop(){
-  const sec=SECTIONS[S.sec];
-  let prog='',pct=0;
-  if(S.mode==='rush'){
-    prog=`<span class="tb-stat timer ${S.time<=10?'low':''}" id="timer">⏱ ${fmtTime(S.time)}</span>`;
-    pct=S.time/S.rushTime*100;
-  }else{
-    prog=`<span class="tb-stat">Q ${S.i}<small>/ ${S.pool.length}</small></span>`;
-    pct=(S.i-(S.answered==null?1:0))/S.pool.length*100;
-  }
-  const lives=S.mode==='survival'?`<span class="tb-stat lives">${'❤️'.repeat(S.lives)}${'🖤'.repeat(3-S.lives)}</span>`:'';
-  return `<div class="topbar">
-      <span class="tb-mode">${sec.icon} ${sec.short} · ${MODES[S.mode].name}</span>
-      ${prog}
-      <span class="tb-stat">✓ ${S.score}</span>
-      <span class="tb-stat" title="Série">🔥 ${S.streak}</span>
-      ${lives}
-      <span class="tb-sp"></span>
-      <button class="btn btn-sec btn-sm" data-act="finish">Terminer</button>
-      <div class="pbar"><div class="pfill" id="tfill" style="width:${pct}%"></div></div>
-    </div>`;
+  S.answered=null;S.qid++;S.fx=null;
+  renderFlash(true);
 }
 function renderSnippet(it,showAns){
   let h=esc(it.snippet).replace(/\n/g,'<br>');
@@ -449,39 +820,44 @@ function renderSnippet(it,showAns){
     if(showAns)return `<span class="gap ok">${esc(it.opts[it.ans])}</span>`;
     return '<span class="gap hl">?</span>';
   });
-  return `<div class="body">${h}</div>`;
+  return `<div class="passage">${h}</div>`;
 }
-function renderFlash(){
-  const {it,perm}=S.q,a=S.answered;
+function renderFlash(fresh){
+  const {it,perm}=S.q,a=S.answered,fx=S.fx||{};
   const chosen=a==null?null:perm[a];
   const opts=perm.map((oi,pos)=>{
-    let cls='opt';
+    let cls='opt',key=LT[pos];
     if(a!=null){
-      if(oi===it.ans)cls+=' correct';else if(oi===chosen)cls+=' wrong';else cls+=' dim';
+      if(oi===it.ans){cls+=' correct';key=ic('check')}
+      else if(oi===chosen){cls+=' wrong';key=ic('x')}else cls+=' dim';
     }
-    return `<button class="${cls}" data-act="answer" data-v="${pos}" ${a!=null?'disabled':''}><span class="lt">${LT[pos]}</span><span>${esc(it.opts[oi])}</span></button>`;
+    return `<button class="${cls}" data-act="answer" data-v="${pos}" ${a!=null?'disabled':''}><span class="key">${key}</span><span>${esc(it.opts[oi])}</span></button>`;
   }).join('');
   let fb='';
   if(a!=null){
     const ok=chosen===it.ans;
-    fb=`<div class="fb ${ok?'ok':'bad'}">${ok?'✓ Correct !':'✗ Réponse : '+esc(it.opts[it.ans])}</div>`;
-    if(it.expl)fb+=`<div class="expl"><b>Explication :</b> ${esc(it.expl)}</div>`;
+    fb=ok?`<div class="verdict ok"><span class="vi">${ic('check')}</span><span>Correct${S.streak>=3?` — série de <b>${S.streak}</b>`:''}</span></div>`
+         :`<div class="verdict bad"><span class="vi">${ic('x')}</span><span>Bonne réponse : <b>${esc(it.opts[it.ans])}</b></span></div>`;
+    if(it.expl)fb+=`<div class="explain">${ic('bulb')}<div>${esc(it.expl)}</div></div>`;
   }
+  let stats='',pct;
+  if(S.mode==='rush'){stats+=timerPill();pct=S.time/S.rushTime*100}
+  else{stats+=`<span class="pill">${ic('file')}${S.i}<small>/${S.pool.length}</small></span>`;pct=(S.i-(a==null?1:0))/S.pool.length*100}
+  stats+=`<span class="pill ok ${fx.ok?'bump':''}">${ic('check')}${S.score}</span>`;
+  stats+=`<span class="pill fire ${S.streak>=3?'hot':''} ${fx.ok&&S.streak>=2?'bump':''}">${ic('flame')}${S.streak}</span>`;
+  if(S.mode==='survival')stats+=`<span class="pill hearts">${[0,1,2].map(i=>ic('heart',i<S.lives?'fill':'lost'+(fx.lost&&i===S.lives?' just':''))).join('')}</span>`;
   const last=S.mode!=='rush'&&(S.i>=S.pool.length||(S.mode==='survival'&&S.lives<=0));
-  const nextBtn=a!=null&&S.mode!=='rush'
-    ?`<div class="actions" style="justify-content:flex-end"><button class="btn btn-primary" data-act="fnext">${last?'Voir les résultats 🏆':'Suivant →'}</button></div><div class="hint">Entrée pour continuer</div>`
-    :`<div class="hint">Raccourcis : touches 1–4 ou A–D</div>`;
-  $('#play').innerHTML=`${flashTop()}
-    <div class="card" id="fcard">
-      <div class="card-meta"><span class="num">Texte ${it.num} · ${it.label}</span><span class="card-title">${esc(it.title)}</span></div>
-      ${it.prompt?`<div class="qtext" style="font-size:18px">${esc(it.prompt)}</div>`:renderSnippet(it,a!=null)}
-      <div class="opts ${it.prompt?'':'grid'}">${opts}</div>
+  const after=a!=null&&S.mode!=='rush'
+    ?`<div class="actions center"><button class="btn btn-primary" data-act="fnext">${last?ic('trophy')+'Voir les résultats':'Suivant'+ic('arrowR')}</button></div><div class="hint"><kbd>Entrée</kbd> pour continuer</div>`
+    :`<div class="hint">Réponds avec <kbd>1</kbd>–<kbd>4</kbd> ou <kbd>A</kbd>–<kbd>D</kbd></div>`;
+  $('#play').innerHTML=`${hud(stats,pct)}
+    <article class="qcard focus ${fresh?'rise':''}" style="--i:0">
+      <div class="qhead"><span class="qnum">Texte ${pad(it.num)} · ${it.label}</span>${it.prompt?'':`<h2 class="qtitle" style="font-size:22px;color:var(--muted)">${esc(it.title)}</h2>`}</div>
+      ${it.prompt?`<p class="rev-meta" style="margin:-14px 0 10px">${esc(it.title)}</p><h2 class="prompt">${esc(it.prompt)}</h2>`:renderSnippet(it,a!=null)}
+      <div class="options ${it.prompt?'':'grid'}">${opts}</div>
       ${fb}
-    </div>${nextBtn}`;
-}
-function floatMsg(txt,color){
-  const d=document.createElement('div');d.className='float';d.textContent=txt;d.style.color=color;
-  document.body.appendChild(d);setTimeout(()=>d.remove(),900);
+    </article>${after}`;
+  if(!fresh)$('#play').classList.remove('enter');
 }
 function answer(pos){
   if(!S||S.done||S.answered!=null)return;
@@ -489,26 +865,31 @@ function answer(pos){
   S.answered=pos;
   S.log.push({it,chosen,ok});
   markError(it,!ok);
-  if(ok){S.score++;S.streak++;S.bestStreak=Math.max(S.bestStreak,S.streak);if(S.mode==='rush')floatMsg('+1','var(--correct)')}
-  else{
+  S.fx={ok};
+  if(ok){
+    S.score++;S.streak++;S.bestStreak=Math.max(S.bestStreak,S.streak);
+    if(S.mode==='rush')floatMsg('+1','var(--ok)');
+    if(S.streak>0&&S.streak%5===0)toast(ic('flame')+` Série de ${S.streak} !`);
+  }else{
     S.streak=0;
-    if(S.mode==='rush'){S.time=Math.max(0,S.time-5);floatMsg('−5 s','var(--wrong)')}
-    if(S.mode==='survival')S.lives--;
+    if(S.mode==='rush'){S.time=Math.max(0,S.time-5);floatMsg('−5s','var(--bad)')}
+    if(S.mode==='survival'){S.lives--;S.fx.lost=true}
   }
-  renderFlash();
-  if(!ok)$('#fcard').classList.add('shake');
+  renderFlash(false);
   if(S.mode==='rush'){
     if(S.time<=0)return finish();
     const tok=S.qid,cur=S;
-    setTimeout(()=>{if(S===cur&&S.qid===tok&&!S.done)nextFlash()},ok?450:1300);
+    setTimeout(()=>{if(S===cur&&S.qid===tok&&!S.done)nextFlash()},ok?500:1400);
   }
 }
 function tick(){
   if(!S||S.done)return;
   S.time--;
-  const el=$('#timer'),f=$('#tfill');
-  if(el){el.textContent='⏱ '+fmtTime(Math.max(0,S.time));el.classList.toggle('low',S.time<=10)}
-  if(f)f.style.width=(S.time/S.rushTime*100)+'%';
+  const p=$('#timer'),tt=$('#ttext'),r=$('#tring'),b=$('#hbar');
+  if(tt)tt.textContent=fmtTime(Math.max(0,S.time));
+  if(p)p.classList.toggle('low',S.time<=10);
+  if(r)r.setAttribute('stroke-dashoffset',C20*(1-Math.max(0,S.time)/S.rushTime));
+  if(b)b.style.width=(S.time/S.rushTime*100)+'%';
   if(S.time<=0)finish();
 }
 
@@ -531,66 +912,83 @@ function finish(){
     const fullRun=S.kind==='flash'||S.checked.every(Boolean);
     if(fullRun&&(bests[bk]==null||val>bests[bk])){rec=bests[bk]!=null||val>0;bests[bk]=val;store.set('eq_best',bests)}
   }
-  let em='🏆',msg='Excellent !';
-  if(pct<50){em='📚';msg='Continue à pratiquer !'}else if(pct<75){em='💪';msg='Pas mal !'}else if(pct<90){em='🌟';msg='Très bien !'}
-  if(S.mode==='rush'){em='⏱️';msg=c+' bonnes réponses en '+(S.rushTime/60)+' min'}
-  if(S.mode==='survival'){em=S.lives>0?'🏅':'💀';msg=S.lives>0?'Survivant !':'Game over'}
-  const sec=SECTIONS[S.sec];
+  let title='Continue <em>comme ça.</em>',sub='Chaque erreur est une question de moins à l’examen.';
+  if(pct>=90){title='Ex<em>cellent.</em>';sub='Presque parfait — tu maîtrises le sujet.'}
+  else if(pct>=75){title='Très <em>bien.</em>';sub='Encore quelques détails et c’est parfait.'}
+  else if(pct>=50){title='Pas <em>mal.</em>';sub='La moitié est faite — revois tes erreurs.'}
+  if(S.mode==='rush'){title=`<em>${c}</em> en ${S.rushTime/60} min.`;sub=`${t} questions tentées, ${t-c} erreurs.`}
+  if(S.mode==='survival'){title=S.lives>0?'Sur<em>vivant.</em>':'Game <em>over.</em>';sub=`${c} bonne${c>1?'s':''} réponse${c>1?'s':''} avant la chute.`}
+  const sec=SECTIONS[S.sec],m=MODES[S.mode];
   const remaining=getErrors(S.sec).length;
   const wrongs=log.filter(l=>!l.ok);
-  S.revAll=false;
-  $('#results').innerHTML=`<div class="card results">
-    <div class="res-emoji">${em}</div>
-    <div class="res-title">${esc(msg)}</div>
-    <div class="res-sub">${sec.name} · ${MODES[S.mode].name}</div>
-    <div class="res-score"><span class="big">${c}</span><span class="sm">/ ${t}</span></div>
-    ${rec?'<span class="record">🎉 Nouveau record !</span>':''}
-    <div class="res-grid">
-      <div class="res-stat sc"><div class="n">${c}</div><div class="l">Correctes</div></div>
-      <div class="res-stat sw"><div class="n">${t-c}</div><div class="l">Incorrectes</div></div>
-      <div class="res-stat"><div class="n">${pct}%</div><div class="l">Réussite</div></div>
-      <div class="res-stat"><div class="n">🔥 ${S.bestStreak}</div><div class="l">Meilleure série</div></div>
+  const C=2*Math.PI*80;
+  $('#results').innerHTML=`
+    <section class="res-hero rise" style="--i:0">
+      <div class="score-ring">
+        <svg viewBox="0 0 184 184"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="s1"/><stop offset="1" class="s2"/></linearGradient></defs>
+          <circle class="tr" cx="92" cy="92" r="80"/><circle class="pr" id="sring" cx="92" cy="92" r="80" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
+        <div class="center"><b><span data-count="${pct}">0</span><small>%</small></b><span class="lbl">réussite</span></div>
+      </div>
+      <div class="res-copy">
+        <div class="eyebrow" style="margin:0">${ic(m.icon)} ${m.name} · ${sec.short}${rec?`<span class="record">${ic('sparkles')}Record</span>`:''}</div>
+        <h2>${title}</h2>
+        <p>${sub}</p>
+        <div class="res-btns">
+          <button class="btn btn-primary" data-act="replay">${ic('redo')}Rejouer</button>
+          ${remaining?`<button class="btn btn-ghost" data-act="errmode">${ic('target')}Mes erreurs · ${remaining}</button>`:''}
+          <button class="btn btn-ghost" data-act="home">${ic('home')}Accueil</button>
+        </div>
+      </div>
+    </section>
+    <div class="tiles">
+      <div class="tile ok rise" style="--i:1">${ic('check')}<b data-count="${c}">0</b><span>correctes</span></div>
+      <div class="tile bad rise" style="--i:2">${ic('x')}<b data-count="${t-c}">0</b><span>incorrectes</span></div>
+      <div class="tile rise" style="--i:3">${ic('layers')}<b data-count="${t}">0</b><span>${sec.unit} jouées</span></div>
+      <div class="tile fire rise" style="--i:4">${ic('flame')}<b data-count="${S.bestStreak}">0</b><span>meilleure série</span></div>
     </div>
-    <div class="res-btns">
-      <button class="btn btn-primary" data-act="replay">🔄 Rejouer</button>
-      ${remaining?`<button class="btn btn-sec" data-act="errmode">🎯 Mes erreurs (${remaining})</button>`:''}
-      <button class="btn btn-sec" data-act="home">🏠 Accueil</button>
+    <div class="review-head rise" style="--i:5">
+      <h2 style="font:400 30px/1 var(--font-serif)">Détail des réponses</h2>
+      ${wrongs.length&&wrongs.length<log.length?`<div class="chipset"><button class="chip on" data-act="revf" data-v="bad">Erreurs · ${wrongs.length}</button><button class="chip" data-act="revf" data-v="all">Tout · ${log.length}</button></div>`:''}
     </div>
-    <div class="rev"><div class="rev-title">Détail des réponses</div>
-      ${wrongs.length&&wrongs.length<log.length?`<div class="rev-filter"><div class="chips"><button class="chip on" data-act="revf" data-v="bad">Erreurs (${wrongs.length})</button><button class="chip" data-act="revf" data-v="all">Tout (${log.length})</button></div></div>`:''}
-      <div id="revList"></div>
-    </div>
-  </div>`;
+    <div class="rev" id="revList"></div>`;
   renderReview(wrongs.length?'bad':'all');
-  screen('results');
+  setScreen('results');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const r=$('#sring');if(r)r.style.strokeDashoffset=C*(1-pct/100);
+    countUp($('#results'));
+  }));
+  if(rec||pct===100)setTimeout(()=>{const r=$('.score-ring');if(!r)return;const b=r.getBoundingClientRect();confetti(b.left+b.width/2,b.top+b.height/2,46)},700);
 }
 function renderReview(f){
   const log=f==='bad'?S.log.filter(l=>!l.ok):S.log;
   document.querySelectorAll('[data-act="revf"]').forEach(b=>b.classList.toggle('on',b.dataset.v===f));
-  $('#revList').innerHTML=log.map(({it,chosen,ok})=>{
+  $('#revList').innerHTML=log.map(({it,chosen,ok},i)=>{
     const good=esc(it.opts[it.ans]);
-    const ctx=it.prompt?esc(it.prompt):esc(it.snippet).replace(/§(\d+)§/g,(m,g)=>+g===it.gid?'<b>____</b>':'…').replace(/\n/g,' ');
-    const ans=ok?`<span class="okt">${good}</span>`:`<span class="badt">${chosen!=null?esc(it.opts[chosen]):'—'}</span> → <span class="okt">${good}</span>`;
-    return `<div class="rev-item"><div class="rev-hdr">Texte ${it.num} — ${esc(it.title)}</div>
-      <div class="rev-q"><span class="rb ${ok?'rb-ok':'rb-no'}">${ok?'✓':'✗'} ${it.label}</span>${ans}<span class="p">${ctx}</span>
-      ${!ok&&it.expl?`<div class="expl">${esc(it.expl)}</div>`:''}</div></div>`;
+    const ctx=it.prompt?esc(it.prompt):esc(it.snippet).replace(/§(\d+)§/g,(m,g)=>+g===it.gid?'<b>_____</b>':'…').replace(/\n/g,' ');
+    const ans=ok?`<span class="okt">${good}</span>`:`<span class="badt">${chosen!=null?esc(it.opts[chosen]):'—'}</span>${ic('arrowR')}<span class="okt">${good}</span>`;
+    return `<div class="rev-item" style="animation-delay:${Math.min(i,12)*35}ms"><span class="rev-dot ${ok?'ok':'bad'}">${ic(ok?'check':'x')}</span><div>
+      <div class="rev-meta">Texte ${pad(it.num)} · ${it.label} · ${esc(it.title)}</div>
+      <div class="rev-q">${ctx}</div>
+      <div class="rev-a">${ans}</div>
+      ${!ok&&it.expl?`<div class="explain">${ic('bulb')}<div>${esc(it.expl)}</div></div>`:''}</div></div>`;
   }).join('');
 }
 
 /* ---------- events ---------- */
 const ACT={
-  sec:v=>{cfg.sec=v;renderHome()},
-  mode:v=>{cfg.mode=v;if(MODES[v].kind==='text'&&!['5','10','20','all'].includes(cfg.count))cfg.count='all';if(v==='mix'&&!['10','20','40','all'].includes(cfg.count))cfg.count='20';renderHome()},
-  count:v=>{cfg.count=v;renderHome()},
-  rtime:v=>{cfg.rushTime=+v;renderHome()},
-  shuf:()=>{cfg.shuffleOpts=!cfg.shuffleOpts;renderHome()},
+  sec:v=>{if(v===cfg.sec&&document.body.dataset.screen==='home')return;cfg.sec=v;renderHome(document.body.dataset.screen==='home'?'swap':'enter')},
+  mode:v=>selectMode(v),
+  count:v=>{cfg.count=v;store.set('eq_cfg',cfg);renderLaunch()},
+  rtime:v=>{cfg.rushTime=+v;store.set('eq_cfg',cfg);renderLaunch()},
+  shuf:()=>{cfg.shuffleOpts=!cfg.shuffleOpts;store.set('eq_cfg',cfg);renderLaunch()},
+  theme:(v,b)=>toggleTheme(b),
   start:()=>start(),
   home:()=>renderHome(),
   replay:()=>start(),
   errmode:()=>{cfg.mode='errors';start()},
   finish:()=>finish(),
   go:v=>{const i=+v;if(i>=0&&i<S.texts.length){S.cur=i;renderText();window.scrollTo({top:0,behavior:'smooth'})}},
-  pick:v=>{const [ii,oi]=v.split(':').map(Number);if(S.checked[S.cur])return;S.answers[S.texts[S.cur].items[ii].key]=oi;renderText()},
+  pick:v=>{const [ii,oi]=v.split(':').map(Number);if(S.checked[S.cur])return;S.answers[S.texts[S.cur].items[ii].key]=oi;renderText();$('#play').classList.remove('enter')},
   check:()=>checkText(),
   answer:v=>answer(+v),
   fnext:()=>{nextFlash();window.scrollTo({top:0,behavior:'smooth'})},
@@ -599,10 +997,18 @@ const ACT={
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');
   if(!b||b.disabled)return;
-  ACT[b.dataset.act]&&ACT[b.dataset.act](b.dataset.v);
+  ACT[b.dataset.act]&&ACT[b.dataset.act](b.dataset.v,b);
+});
+document.addEventListener('pointermove',e=>{
+  const c=e.target.closest&&e.target.closest('.mcard');
+  if(!c)return;
+  const r=c.getBoundingClientRect();
+  c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');
 });
 document.addEventListener('keydown',e=>{
-  if(!S||S.done||S.kind!=='flash'||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key==='Enter'&&e.target.matches('.brand')){renderHome();return}
+  if(!S||S.done||S.kind!=='flash')return;
   const k=e.key.toLowerCase();
   let pos='1234'.indexOf(k);if(pos<0)pos='abcd'.indexOf(k);
   if(pos>=0&&S.answered==null&&pos<S.q.perm.length){answer(pos);return}
