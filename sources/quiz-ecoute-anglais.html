@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio d'écoute — Question / Réponse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f2e8;
+    --bg-vignette:#ede6d5;
+    --panel:#fffdf7;
+    --panel-raised:#f1ece0;
+    --divider:#e0d8c4;
+    --cream:#292219;
+    --muted:#8a8071;
+    --brass:#c1893f;
+    --brass-dim:#a6773a;
+    --teal:#4c9c8b;
+    --teal-text:#2c7a68;
+    --red:#c1573f;
+    --red-text:#a3402a;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 50% -10%, var(--bg-vignette) 0%, var(--bg) 55%);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+    line-height:1.5;
+  }
+  .console{
+    width:100%;
+    max-width:560px;
+    background:var(--panel);
+    border:1px solid var(--divider);
+    border-radius:var(--radius);
+    padding:26px 24px 28px;
+    box-shadow:0 24px 50px -24px rgba(60,48,26,.28), 0 2px 6px rgba(60,48,26,.06);
+    position:relative;
+  }
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .lamp-row{display:flex;align-items:center;gap:6px;}
+  .lamp{
+    width:7px;height:7px;border-radius:50%;
+    background:#cabf9f;
+    box-shadow:none;
+    transition:background .25s, box-shadow .25s;
+  }
+  .lamp.live{
+    background:var(--red);
+    box-shadow:0 0 8px 1px rgba(193,87,63,.75);
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0 0 18px;
+    letter-spacing:-.01em;
+  }
+  .progress-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:20px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .progress-track{
+    flex:1;
+    height:4px;
+    border-radius:2px;
+    background:var(--divider);
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--brass-dim),var(--brass));
+    transition:width .4s ease;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* --- Intro --- */
+  #panel-intro p{color:var(--muted);font-size:14.5px;margin:0 0 18px;}
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  select, input[type=range]{width:100%;}
+  select{
+    background:var(--panel-raised);
+    color:var(--cream);
+    border:1px solid var(--divider);
+    border-radius:8px;
+    padding:9px 10px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+  }
+  .rate-readout{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--brass);}
+  #voiceNotice{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-top:-6px;
+    margin-bottom:16px;
+  }
+
+  .btn{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    border:none;
+    border-radius:10px;
+    padding:13px 18px;
+    cursor:pointer;
+    transition:transform .12s ease, background .2s ease, box-shadow .2s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+  .btn-primary{
+    background:var(--brass);
+    color:#1b140a;
+    width:100%;
+  }
+  .btn-primary:hover{background:#dba85f;}
+  .btn-primary:disabled{background:#e6dfcb;color:#a89a7e;cursor:not-allowed;}
+  .btn-ghost{
+    background:transparent;
+    border:1px solid var(--divider);
+    color:var(--cream);
+  }
+  .btn-ghost:hover{border-color:var(--brass-dim);}
+  .icon-btn{
+    background:var(--panel-raised);
+    border:1px solid var(--divider);
+    color:var(--cream);
+    border-radius:9px;
+    width:42px;height:42px;
+    font-size:16px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .icon-btn:hover{border-color:var(--brass-dim);}
+  .icon-btn:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+  /* --- Oscilloscope (signature element) --- */
+  .scope-wrap{
+    background:#0b1015;
+    border:1px solid var(--divider);
+    border-radius:10px;
+    margin:4px 0 18px;
+    padding:6px 10px;
+  }
+  .scope-wrap svg{display:block;width:100%;height:44px;}
+  .scope-wrap polyline{
+    fill:none;
+    stroke:var(--brass-dim);
+    stroke-width:1.6;
+    transition:stroke .3s;
+  }
+  .scope-wrap.live polyline{stroke:var(--teal);}
+
+  /* --- Question / play controls --- */
+  .qcounter{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    color:var(--brass);
+    letter-spacing:.04em;
+  }
+  .script-text{
+    font-size:16px;
+    margin:2px 0 14px;
+    color:var(--cream);
+    filter:blur(7px);
+    user-select:none;
+    transition:filter .3s ease;
+  }
+  #panel-quiz.reveal-text .script-text{filter:none;user-select:text;}
+  .play-row{display:flex;gap:10px;margin-bottom:20px;}
+  .play-row .btn-primary{flex:1;}
+
+  .toggle-text-row{
+    display:flex;
+    justify-content:flex-end;
+    margin:-8px 0 14px;
+  }
+  .link-btn{
+    background:none;border:none;color:var(--muted);
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+    text-decoration:underline;cursor:pointer;letter-spacing:.02em;
+  }
+  .link-btn:hover{color:var(--cream);}
+
+  .choices{display:flex;flex-direction:column;gap:9px;margin-bottom:16px;}
+  .choice{
+    display:flex;align-items:center;gap:12px;
+    background:var(--panel-raised);
+    border:1px solid var(--divider);
+    border-radius:11px;
+    padding:12px 12px 12px 6px;
+    cursor:pointer;
+    transition:border-color .2s, background .2s;
+  }
+  .choice:hover{border-color:var(--brass-dim);}
+  .choice:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+  .choices.locked .choice{cursor:default;pointer-events:none;}
+  .choices.locked .choice-replay{pointer-events:auto;}
+  .choice-letter{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    width:30px;height:30px;
+    flex-shrink:0;
+    border-radius:50%;
+    background:var(--panel);
+    border:1px solid var(--divider);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .choice-text{flex:1;font-size:14.5px;filter:blur(6px);transition:filter .3s ease;}
+  #panel-quiz.reveal-text .choice-text,
+  .choice.revealed .choice-text{filter:none;}
+  .choice-replay{
+    background:none;border:none;color:var(--muted);
+    font-size:16px;cursor:pointer;flex-shrink:0;padding:4px;
+    border-radius:6px;
+  }
+  .choice-replay:hover{color:var(--brass);}
+  .choice-replay:focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+
+  .choice.is-correct{border-color:var(--teal);background:rgba(76,156,139,.12);}
+  .choice.is-correct .choice-letter{background:var(--teal);border-color:var(--teal);color:#0b1015;}
+  .choice.is-wrong{border-color:var(--red);background:rgba(193,87,63,.12);}
+  .choice.is-wrong .choice-letter{background:var(--red);border-color:var(--red);color:#160b09;}
+
+  .feedback{
+    display:none;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    padding:10px 12px;
+    border-radius:9px;
+    margin-bottom:16px;
+    background:var(--panel-raised);
+    border:1px solid var(--divider);
+  }
+  .feedback.show{display:block;}
+  .feedback.ok{color:var(--teal-text);border-color:var(--teal);}
+  .feedback.ko{color:var(--red-text);border-color:var(--red);}
+
+  .nav-row{display:flex;justify-content:flex-end;}
+  .nav-row .btn-primary{width:auto;padding:12px 22px;}
+
+  /* --- Results --- */
+  #panel-results .score-big{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:52px;font-weight:700;
+    line-height:1;margin:6px 0 2px;
+  }
+  #panel-results .score-label{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--brass);font-size:12.5px;letter-spacing:.08em;
+    text-transform:uppercase;margin-bottom:20px;
+  }
+  .review-item{
+    border-top:1px solid var(--divider);
+    padding:12px 0;
+    font-size:13.5px;
+  }
+  .review-item .rq{color:var(--cream);margin-bottom:6px;}
+  .review-item .ra{color:var(--muted);font-size:12.5px;}
+  .review-item .ra.wrong{color:var(--red-text);}
+  .review-item .ra.right{color:var(--teal-text);}
+  .review-mini-btn{
+    background:none;border:none;color:var(--muted);cursor:pointer;
+    font-size:14px;margin-left:6px;
+  }
+  .review-mini-btn:hover{color:var(--brass);}
+
+  footer.note{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--muted);
+    margin-top:16px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+
+  @media (max-width:420px){
+    .console{padding:20px 16px 22px;}
+    h1{font-size:19px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="console">
+  <div class="eyebrow">
+    <span>Studio d'écoute · Question-Réponse</span>
+    <span class="lamp-row"><span class="lamp" id="lamp"></span>ON AIR</span>
+  </div>
+  <h1>Compréhension orale — 24 dialogues</h1>
+
+  <div class="progress-row">
+    <span id="progressText">0 / 24</span>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <!-- INTRO -->
+  <section class="panel active" id="panel-intro">
+    <p>24 mini-échanges à écouter, chacun suivi de trois réponses possibles (A, B, C). Le texte reste flouté tant que vous n'avez pas répondu — l'objectif est de reconnaître la bonne réponse à l'oreille, comme dans un vrai test d'écoute.</p>
+
+    <div class="field">
+      <label for="voiceSelect">Voix (anglais britannique de préférence)</label>
+      <select id="voiceSelect"></select>
+    </div>
+    <p id="voiceNotice"></p>
+
+    <div class="field">
+      <label for="rateRange">Vitesse de lecture — <span class="rate-readout" id="rateReadout">0.92×</span></label>
+      <input type="range" id="rateRange" min="0.6" max="1.15" step="0.01" value="0.92">
+    </div>
+
+    <button class="btn btn-primary" id="startBtn">Démarrer l'écoute ▶</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="panel" id="panel-quiz">
+    <div class="qcounter" id="qcounter">Q. 01 / 24</div>
+
+    <div class="scope-wrap" id="scopeWrap">
+      <svg viewBox="0 0 300 44" preserveAspectRatio="none">
+        <polyline id="wave" points=""></polyline>
+      </svg>
+    </div>
+
+    <p class="script-text" id="questionText"></p>
+
+    <div class="play-row">
+      <button class="btn btn-primary" id="playBtn">▶ Écouter la question et les réponses</button>
+      <button class="icon-btn" id="replayBtn" title="Réécouter" aria-label="Réécouter">⟳</button>
+    </div>
+
+    <div class="toggle-text-row">
+      <button class="link-btn" id="toggleTextBtn">Afficher le texte</button>
+    </div>
+
+    <div class="choices" id="choices">
+      <div class="choice" data-letter="A" tabindex="0" role="button" aria-label="Choix A">
+        <span class="choice-letter">A</span>
+        <span class="choice-text"></span>
+        <button class="choice-replay" aria-label="Écouter le choix A">🔊</button>
+      </div>
+      <div class="choice" data-letter="B" tabindex="0" role="button" aria-label="Choix B">
+        <span class="choice-letter">B</span>
+        <span class="choice-text"></span>
+        <button class="choice-replay" aria-label="Écouter le choix B">🔊</button>
+      </div>
+      <div class="choice" data-letter="C" tabindex="0" role="button" aria-label="Choix C">
+        <span class="choice-letter">C</span>
+        <span class="choice-text"></span>
+        <button class="choice-replay" aria-label="Écouter le choix C">🔊</button>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedback" aria-live="polite"></div>
+
+    <div class="nav-row">
+      <button class="btn btn-primary" id="nextBtn" disabled>Suivant →</button>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="panel" id="panel-results">
+    <div class="score-label">Rapport de session</div>
+    <div class="score-big" id="scoreBig">0 / 24</div>
+    <div class="score-label" id="scoreQualif"></div>
+    <button class="btn btn-primary" id="restartBtn" style="margin-bottom:8px;">Recommencer</button>
+    <div id="reviewList"></div>
+  </section>
+
+  <footer class="note">Utilisez A / B / C pour répondre au clavier, Entrée pour continuer.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var quizData = [
+    {q:"Is the elevator broken?", c:["Yes, please take the stairs instead.","Yes, the water is unsafe for drinking.","Yes, it is an endangered species."], correct:0},
+    {q:"Have you eaten dinner yet?", c:["My father left the oven on.","It was delicious.","I can't decide which scarf to purchase."], correct:0},
+    {q:"What is the problem with your credit card?", c:["When I tried to make a purchase, it was rejected.","The bank is closed for the federal holiday.","Mr. Owens called in sick today."], correct:0},
+    {q:"The tour guide was outstanding, don't you think?", c:["Her comments were both entertaining and informative.","Yes, the guidelines seem to be very complete.","Well, I think the next tour starts in an hour."], correct:0},
+    {q:"Could you put that on my bill, please?", c:["Certainly. If you just sign the check.","Actually, I built it myself.","I'm sorry, but Bill is not on duty today."], correct:0},
+    {q:"What is the fine for overdue books?", c:["You can borrow videos too.","Yes, it's an excellent book.","It's 10 cents a day."], correct:2},
+    {q:"Why is this train running late?", c:["We met them two hours ago.","I think there are mechanical problems.","It's scheduled for platform 8."], correct:1},
+    {q:"How soon can you repair my watch?", c:["It will be ready next week.","I will turn off the television.","Almost 2 hours ago."], correct:0},
+    {q:"Shall we send you a reminder for your next dental appointment?", c:["No, I can't remember.","Yes, that would be helpful.","No, I'd like a complete set."], correct:1},
+    {q:"Whose coffee cup is this on my desk?", c:["It's not his desk.","I was wondering where I left it.","Cream and sugar, please."], correct:1},
+    {q:"Whose office is that?", c:["Your computer needs to be turned off.","The floor measures 12 ft by 14 ft.","It belongs to Mrs. Alvarez."], correct:2},
+    {q:"How long will the trip last?", c:["Almost 3 hours.","I can't run because my leg is injured.","I can sew it back together for you."], correct:0},
+    {q:"Would you mind changing seats with me?", c:["No, I don't mind at all.","Sorry, I don't have change.","There are no more seats available."], correct:0},
+    {q:"What kind of plant is it?", c:["She's watering the plant.","It's a car factory.","That's very kind of you."], correct:1},
+    {q:"Where do you keep the bread?", c:["I'm worried that my car will break down.","In the corner next to the vegetables.","No, it is purple."], correct:1},
+    {q:"Who's the new chef at Warden's Bakery?", c:["They now open at 7:00 in the morning.","The bakery has been there for 5 years.","A man who worked at Cape Pastry Shop."], correct:2},
+    {q:"May I borrow your stapler?", c:["Hey, I have to order more paper clips.","Please return it shortly.","The loan carries a 7% interest rate."], correct:1},
+    {q:"May I leave the office early today?", c:["Tomorrow is the first day of spring.","It is supposed to be very cold tonight.","That's fine as long as your work is done."], correct:2},
+    {q:"How can you stay in such great shape?", c:["There is a gym in my building.","That circular saw is on sale at the hardware store.","The floor measures 200 square feet."], correct:0},
+    {q:"Should I wait here at the counter or follow you back to the warehouse?", c:["I put the scale on the counter.","My house is not far from here.","Oh, come with me, please."], correct:2},
+    {q:"Has this milk gone bad?", c:["I don't think my supervisor likes me.","Yes, I don't think it smells very good.","No, I shouldn't eat cookies."], correct:1},
+    {q:"Would you like a window or an aisle seat?", c:["I'll get one for both of us.","A table for four, please.","Either is fine with me."], correct:2},
+    {q:"How did you find your new job?", c:["I worked there for two years.","I answered an ad in the paper.","I need to sign the new contract."], correct:1},
+    {q:"Which direction does this window face?", c:["We are looking west toward the sunset.","You look a little bit tired this morning.","I think shaving is unpleasant."], correct:0}
+  ];
+
+  // Ordre aléatoire à chaque actualisation de la page
+  function shuffle(arr){
+    for(var i = arr.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+  shuffle(quizData);
+
+  var LETTERS = ["A","B","C"];
+  var state = { idx:0, answers:new Array(quizData.length).fill(null), rate:0.92, voice:null, speaking:false };
+  var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- DOM ----------
+  var panels = {
+    intro: document.getElementById('panel-intro'),
+    quiz: document.getElementById('panel-quiz'),
+    results: document.getElementById('panel-results')
+  };
+  var voiceSelect = document.getElementById('voiceSelect');
+  var voiceNotice = document.getElementById('voiceNotice');
+  var rateRange = document.getElementById('rateRange');
+  var rateReadout = document.getElementById('rateReadout');
+  var startBtn = document.getElementById('startBtn');
+  var qcounter = document.getElementById('qcounter');
+  var questionText = document.getElementById('questionText');
+  var playBtn = document.getElementById('playBtn');
+  var replayBtn = document.getElementById('replayBtn');
+  var toggleTextBtn = document.getElementById('toggleTextBtn');
+  var choicesWrap = document.getElementById('choices');
+  var choiceEls = Array.prototype.slice.call(document.querySelectorAll('.choice'));
+  var feedback = document.getElementById('feedback');
+  var nextBtn = document.getElementById('nextBtn');
+  var progressFill = document.getElementById('progressFill');
+  var progressText = document.getElementById('progressText');
+  var lamp = document.getElementById('lamp');
+  var scopeWrap = document.getElementById('scopeWrap');
+  var wave = document.getElementById('wave');
+  var scoreBig = document.getElementById('scoreBig');
+  var scoreQualif = document.getElementById('scoreQualif');
+  var reviewList = document.getElementById('reviewList');
+  var restartBtn = document.getElementById('restartBtn');
+
+  function showPanel(name){
+    Object.keys(panels).forEach(function(k){ panels[k].classList.toggle('active', k===name); });
+  }
+
+  // ---------- Voices ----------
+  var preferredNames = [
+    "Google UK English Female","Google UK English Male",
+    "Microsoft Sonia Online (Natural) - English (United Kingdom)",
+    "Microsoft Ryan Online (Natural) - English (United Kingdom)",
+    "Microsoft Libby Online (Natural) - English (United Kingdom)",
+    "Daniel","Kate","Serena","Arthur","Stephanie"
+  ];
+
+  function populateVoices(){
+    var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    if(!voices.length) return;
+    var english = voices.filter(function(v){ return /^en/i.test(v.lang); });
+    var pool = english.length ? english : voices;
+
+    voiceSelect.innerHTML = "";
+    pool.forEach(function(v, i){
+      var opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = v.name + " (" + v.lang + ")";
+      voiceSelect.appendChild(opt);
+    });
+
+    var chosen = null;
+    for(var i=0;i<preferredNames.length && !chosen;i++){
+      chosen = pool.find(function(v){ return v.name === preferredNames[i]; });
+    }
+    if(!chosen) chosen = pool.find(function(v){ return v.lang === 'en-GB'; });
+    if(!chosen) chosen = pool.find(function(v){ return /^en-GB/i.test(v.lang); });
+    if(!chosen) chosen = pool[0];
+
+    if(chosen){
+      voiceSelect.value = chosen.name;
+      state.voice = chosen;
+    }
+    voiceNotice.textContent = (chosen && /^en-GB/i.test(chosen.lang))
+      ? "Voix britannique détectée : " + chosen.name + "."
+      : "Aucune voix « en-GB » trouvée sur cet appareil — voix disponible utilisée à la place. Vous pouvez en choisir une autre ci-dessus.";
+  }
+
+  if(window.speechSynthesis){
+    populateVoices();
+    window.speechSynthesis.onvoiceschanged = populateVoices;
+  } else {
+    voiceNotice.textContent = "La synthèse vocale n'est pas disponible dans ce navigateur.";
+    startBtn.disabled = true;
+  }
+
+  voiceSelect.addEventListener('change', function(){
+    var voices = window.speechSynthesis.getVoices();
+    var v = voices.find(function(v){ return v.name === voiceSelect.value; });
+    if(v) state.voice = v;
+  });
+
+  rateRange.addEventListener('input', function(){
+    state.rate = parseFloat(rateRange.value);
+    rateReadout.textContent = state.rate.toFixed(2) + "×";
+  });
+
+  // ---------- Oscilloscope ----------
+  var scopePhase = 0;
+  function waveString(active){
+    var pts = [];
+    var w = 300, mid = 22;
+    for(var i=0;i<=48;i++){
+      var x = (w/48)*i;
+      var y;
+      if(active){
+        y = mid + Math.sin(i*0.55 + scopePhase) * (10 + Math.random()*6);
+      } else {
+        y = mid + Math.sin(i*0.3 + scopePhase*0.3) * 2;
+      }
+      pts.push(x.toFixed(1)+","+y.toFixed(1));
+    }
+    return pts.join(" ");
+  }
+  var scopeRAF = null;
+  function scopeTick(){
+    scopePhase += state.speaking ? 0.5 : 0.06;
+    wave.setAttribute('points', waveString(state.speaking));
+    scopeRAF = requestAnimationFrame(scopeTick);
+  }
+  if(!reducedMotion){
+    scopeTick();
+  } else {
+    wave.setAttribute('points', waveString(false));
+  }
+
+  function setSpeaking(on){
+    state.speaking = on;
+    lamp.classList.toggle('live', on);
+    scopeWrap.classList.toggle('live', on);
+    if(reducedMotion) wave.setAttribute('points', waveString(on));
+  }
+
+  // ---------- Speech ----------
+  function speakOne(text, onend){
+    if(!window.speechSynthesis){ if(onend) onend(); return; }
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-GB';
+    if(state.voice) u.voice = state.voice;
+    u.rate = state.rate;
+    u.pitch = 1;
+    u.onend = function(){ if(onend) onend(); };
+    u.onerror = function(){ if(onend) onend(); };
+    window.speechSynthesis.speak(u);
+  }
+
+  function speakSequence(list, onDone){
+    window.speechSynthesis.cancel();
+    setSpeaking(true);
+    var i = 0;
+    function step(){
+      if(i >= list.length){ setSpeaking(false); if(onDone) onDone(); return; }
+      var item = list[i++];
+      speakOne(item, step);
+    }
+    step();
+  }
+
+  function speakSingle(text){
+    window.speechSynthesis.cancel();
+    setSpeaking(true);
+    speakOne(text, function(){ setSpeaking(false); });
+  }
+
+  // ---------- Quiz rendering ----------
+  function renderQuestion(){
+    var item = quizData[state.idx];
+    qcounter.textContent = "Q. " + String(state.idx+1).padStart(2,'0') + " / " + quizData.length;
+    progressText.textContent = state.idx + " / " + quizData.length;
+    progressFill.style.width = ((state.idx)/quizData.length*100) + "%";
+
+    questionText.textContent = item.q;
+    choiceEls.forEach(function(el, i){
+      el.querySelector('.choice-text').textContent = item.c[i];
+      el.classList.remove('is-correct','is-wrong','revealed');
+    });
+    choicesWrap.classList.remove('locked');
+    feedback.className = 'feedback';
+    feedback.textContent = '';
+    nextBtn.disabled = true;
+    nextBtn.textContent = (state.idx === quizData.length-1) ? "Voir les résultats" : "Suivant →";
+
+    var already = state.answers[state.idx];
+    if(already !== null){
+      lockChoice(already, true);
+    }
+  }
+
+  function playCurrentSequence(){
+    var item = quizData[state.idx];
+    var seq = [item.q];
+    item.c.forEach(function(txt, i){ seq.push(LETTERS[i] + ". " + txt); });
+    speakSequence(seq);
+  }
+
+  playBtn.addEventListener('click', playCurrentSequence);
+  replayBtn.addEventListener('click', playCurrentSequence);
+
+  toggleTextBtn.addEventListener('click', function(){
+    var on = panels.quiz.classList.toggle('reveal-text');
+    toggleTextBtn.textContent = on ? "Masquer le texte" : "Afficher le texte";
+  });
+
+  function lockChoice(letterIndex, silent){
+    var item = quizData[state.idx];
+    choicesWrap.classList.add('locked');
+    choiceEls.forEach(function(el, i){
+      el.classList.add('revealed');
+      if(i === item.correct) el.classList.add('is-correct');
+      if(i === letterIndex && letterIndex !== item.correct) el.classList.add('is-wrong');
+    });
+    var correctText = LETTERS[item.correct] + ". " + item.c[item.correct];
+    if(letterIndex === item.correct){
+      feedback.className = 'feedback show ok';
+      feedback.textContent = "✔ Bonne réponse — " + correctText;
+    } else {
+      feedback.className = 'feedback show ko';
+      feedback.textContent = "✘ Réponse incorrecte. Bonne réponse : " + correctText;
+    }
+    nextBtn.disabled = false;
+    if(!silent) state.answers[state.idx] = letterIndex;
+  }
+
+  choiceEls.forEach(function(el, i){
+    el.addEventListener('click', function(){
+      if(state.answers[state.idx] !== null) return;
+      lockChoice(i, false);
+    });
+    el.addEventListener('keydown', function(e){
+      if((e.key === 'Enter' || e.key === ' ') && state.answers[state.idx] === null){
+        e.preventDefault();
+        lockChoice(i, false);
+      }
+    });
+    var replay = el.querySelector('.choice-replay');
+    replay.addEventListener('click', function(e){
+      e.stopPropagation();
+      var txt = quizData[state.idx].c[i];
+      speakSingle(LETTERS[i] + ". " + txt);
+    });
+  });
+
+  nextBtn.addEventListener('click', function(){
+    if(nextBtn.disabled) return;
+    window.speechSynthesis.cancel();
+    setSpeaking(false);
+    if(state.idx < quizData.length-1){
+      state.idx++;
+      renderQuestion();
+    } else {
+      progressFill.style.width = "100%";
+      progressText.textContent = quizData.length + " / " + quizData.length;
+      showResults();
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(!panels.quiz.classList.contains('active')) return;
+    var tag = (document.activeElement && document.activeElement.tagName) || '';
+    if(tag === 'SELECT' || tag === 'INPUT') return;
+    var k = e.key.toLowerCase();
+    var map = {a:0,b:1,c:2,'1':0,'2':1,'3':2};
+    if(map.hasOwnProperty(k) && state.answers[state.idx] === null){
+      lockChoice(map[k], false);
+    } else if(e.key === 'Enter' && !nextBtn.disabled){
+      nextBtn.click();
+    }
+  });
+
+  // ---------- Results ----------
+  function showResults(){
+    var score = 0;
+    quizData.forEach(function(item, i){ if(state.answers[i] === item.correct) score++; });
+    scoreBig.textContent = score + " / " + quizData.length;
+    var pct = Math.round(score/quizData.length*100);
+    var qualif = pct >= 90 ? "Excellent niveau" : pct >= 70 ? "Bon niveau" : pct >= 50 ? "Niveau correct" : "À retravailler";
+    scoreQualif.textContent = qualif + " · " + pct + "%";
+
+    reviewList.innerHTML = '';
+    quizData.forEach(function(item, i){
+      var given = state.answers[i];
+      var isRight = given === item.correct;
+      var div = document.createElement('div');
+      div.className = 'review-item';
+
+      var rq = document.createElement('div');
+      rq.className = 'rq';
+      rq.textContent = (i+1) + ". " + item.q;
+      div.appendChild(rq);
+
+      var ra = document.createElement('div');
+      ra.className = 'ra ' + (isRight ? 'right' : 'wrong');
+      var yourText = given === null ? "(pas de réponse)" : LETTERS[given] + ". " + item.c[given];
+      ra.textContent = "Votre réponse : " + yourText;
+      if(!isRight){
+        ra.textContent += "  →  Bonne réponse : " + LETTERS[item.correct] + ". " + item.c[item.correct];
+      }
+      div.appendChild(ra);
+
+      var mini = document.createElement('button');
+      mini.className = 'review-mini-btn';
+      mini.setAttribute('aria-label','Réécouter ce dialogue');
+      mini.textContent = '🔊';
+      mini.addEventListener('click', function(){
+        var seq = [item.q];
+        item.c.forEach(function(t,idx2){ seq.push(LETTERS[idx2]+". "+t); });
+        speakSequence(seq);
+      });
+      ra.appendChild(mini);
+
+      div.appendChild(ra);
+      reviewList.appendChild(div);
+    });
+
+    showPanel('results');
+  }
+
+  restartBtn.addEventListener('click', function(){
+    state.idx = 0;
+    state.answers = new Array(quizData.length).fill(null);
+    showPanel('intro');
+    progressFill.style.width = "0%";
+    progressText.textContent = "0 / " + quizData.length;
+  });
+
+  startBtn.addEventListener('click', function(){
+    if(!window.speechSynthesis) return;
+    showPanel('quiz');
+    renderQuestion();
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "redirects": [
+    { "source": "/wayground/1", "destination": "https://wayground.com/join/game/U2FsdGVkX1%252FLtGeizPLSdn8SgyD1rrpnM0TtSRHgAYyOVudSCZnAfpCbatbvO6Lh?gameType=solo", "permanent": false },
+    { "source": "/wayground/2", "destination": "https://wayground.com/join/game/U2FsdGVkX1%252F4Mo1z0dFmuIfZSIwo88ZsE328tABp9EZY1cqZoa1IOliDL02r0NZz?gameType=solo", "permanent": false }
+  ]
+}
